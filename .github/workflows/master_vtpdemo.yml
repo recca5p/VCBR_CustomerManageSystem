@@ -2,7 +2,7 @@
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
 name: Build and deploy Frontend on Azure
-run-name: "#${{ github.run_number }} - ${{ github.ref_name }} - ${{ github.sha }}"
+run-name: "#${{ github.run_number }} - ${{ github.ref_name }} - ${{ github.sha }} - Frontend"
 
 on:
   workflow_dispatch:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '14.x'
       
       - name: Install yarn
         run: npm install --global yarn
