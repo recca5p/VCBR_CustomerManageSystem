@@ -10,3 +10,4 @@ aspnet-core/src/VoTanPhatVCBRDemo.Migrator/Logs/Logs.txt
 aspnet-core/build/outputs/
 aspnet-core/docker/mvc/Mvc-Logs/
 
+/aspnet-core/src/VoTanPhatVCBRDemo.EntityFrameworkCore/Migrations

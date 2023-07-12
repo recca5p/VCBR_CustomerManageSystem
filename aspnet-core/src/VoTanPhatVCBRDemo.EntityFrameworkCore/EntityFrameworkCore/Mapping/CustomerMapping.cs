@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace VoTanPhatVCBRDemo.EntityFrameworkCore.Mapping
             builder.HasMany(c => c.TransactionHistories)
                 .WithOne(th => th.Customer)
                 .HasForeignKey(c => c.Id);
+            builder.HasOne<IdentityUser>().WithMany().HasForeignKey(c => c.UserId);
         }
     }
 }

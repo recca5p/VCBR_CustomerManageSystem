@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace VoTanPhatVCBRDemo.Domain
 {
-    public class TransactionHistory : AuditedAggregateRoot<Guid>
+    public class TransactionHistory : AuditedAggregateRoot<int>
     {
-        public decimal Amount { get; set; }
+        public double Amount { get; set; }
         public bool IsDeleted { get; set; }
-        public Guid CustomerId { get; set; }
+        public int CustomerId { get; set; }
         public Customer Customer { get; set; }
     }
 }
