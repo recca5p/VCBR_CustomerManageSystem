@@ -20,13 +20,18 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16.x'
-      - run: npm ci
+      
+      - name: Install yarn
+        run: npm install --global yarn
+          
+      - name: Install  packages
+        run: yarn install
       
       - name: Build
-        run: npm run build
+        run: yarn build
         
       - name: Test
-        run: npm run test
+        run: yarn test
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
