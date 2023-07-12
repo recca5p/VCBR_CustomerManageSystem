@@ -12,7 +12,7 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
-        working-directory: APL.Utility.Website
+        working-directory: angular
     steps:
       - uses: actions/checkout@v2
 
