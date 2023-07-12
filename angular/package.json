@@ -10,6 +10,7 @@
     "lint": "tslint --force --project src/tsconfig.json src/**/*.ts -t verbose",
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0 --port 4200",
+    "build": "ng build --aot --prod --build-optimizer --common-chunk --source-map false --optimization",
     "test": "ng test"
   },
   "dependencies": {
@@ -41,7 +42,7 @@
     "zone.js": "~0.12.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^15.0.3",
+    "@angular-devkit/build-angular": "^16.1.4",
     "@angular/cli": "^15.0.3",
     "@angular/compiler-cli": "^15.0.3",
     "@angularclass/hmr": "^3.0.0",
