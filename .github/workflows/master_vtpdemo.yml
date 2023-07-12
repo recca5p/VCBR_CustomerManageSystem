@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Frontend Azure
+name: Build and deploy Frontend to Azure
 run-name: "#${{ github.run_number }} - ${{ github.ref_name }} - ${{ github.sha }}"
 
 on:
@@ -10,7 +10,9 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
+    defaults:
+      run:
+        working-directory: APL.Utility.Website
     steps:
       - uses: actions/checkout@v2
 
