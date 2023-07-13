@@ -61,7 +61,7 @@ public class VCBRDemoHttpApiHostModule : AbpModule
     {
         var configuration = context.Services.GetConfiguration();
         var hostingEnvironment = context.Services.GetHostingEnvironment();
-
+        PreConfigureOpenIddictServerBuilder(context);
         ConfigureAuthentication(context);
         ConfigureBundles();
         ConfigureUrls(configuration);
@@ -170,11 +170,19 @@ public class VCBRDemoHttpApiHostModule : AbpModule
         });
     }
 
+    private void PreConfigureOpenIddictServerBuilder(ServiceConfigurationContext context)
+    {
+        PreConfigure<OpenIddictServerBuilder>(builder =>
+        {
+            builder.AddEncryptionCertificate("E4D2CBAA9E75A4CC8662D1DCEB42718FB2851BD3");
+            builder.AddSigningCertificate("E4D2CBAA9E75A4CC8662D1DCEB42718FB2851BD3");
+        });
+    }
+
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
     {
         var app = context.GetApplicationBuilder();
         var env = context.GetEnvironment();
-
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
