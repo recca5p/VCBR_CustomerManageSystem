@@ -33,8 +33,8 @@ jobs:
       - name: Archive artifact
         uses: ihiroky/archive-action@v1
         with:
+          root_dir: ${{ github.workspace }}/angular/dist
           file_path: publish.zip
-          path: .
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
         with:
