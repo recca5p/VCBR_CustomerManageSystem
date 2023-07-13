@@ -1,5 +1,5 @@
 name: Build and deploy Backend on Azure
-run-name: "#${{ github.run_number }} - ${{ github.ref_name }} - ${{ github.sha }}"
+run-name: "#${{ github.run_number }} - ${{ github.ref_name }} - ${{ github.sha }} - Backend"
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ jobs:
       - name: Inject secrets to application
         uses: microsoft/variable-substitution@v1
         with:
-          files: '${{ github.workspace }}/aspnet-core/src/VCBRDemo.Web.Host/appsettings.json'
+          files: '${{ github.workspace }}/aspnet-core/src/VCBRDemo.HttpApi.Host/appsettings.json'
         env:
           ConnectionStrings.Default: ${{ secrets.DATABASE_CONNRECTION_STRING }}
       - name: Publish
