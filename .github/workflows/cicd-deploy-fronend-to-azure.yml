@@ -54,5 +54,5 @@ jobs:
         with:
           app-name: 'vtpdemo'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1B1A96AEB5374F0BA6AEDBD925E68621 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CDB197C05A8F426482170FEB810BA143 }}
           package: .
