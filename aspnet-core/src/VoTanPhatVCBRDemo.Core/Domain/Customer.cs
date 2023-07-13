@@ -19,7 +19,6 @@ namespace VoTanPhatVCBRDemo.Domain
         public double Balance { get; set; }
         public bool IsActive { get; set; }
         public virtual ICollection<TransactionHistory> TransactionHistories { get; set; }
-
-        public string UserId { get; set; }
+        public long UserId { get; set; }
     }
 }
