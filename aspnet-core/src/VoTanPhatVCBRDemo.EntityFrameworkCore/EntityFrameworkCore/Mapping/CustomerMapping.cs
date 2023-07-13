@@ -18,7 +18,6 @@ namespace VoTanPhatVCBRDemo.EntityFrameworkCore.Mapping
             builder.HasMany(c => c.TransactionHistories)
                 .WithOne(th => th.Customer)
                 .HasForeignKey(c => c.Id);
-            builder.HasOne<IdentityUser>().WithMany().HasForeignKey(c => c.UserId);
         }
     }
 }
