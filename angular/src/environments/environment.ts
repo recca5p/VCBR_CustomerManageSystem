@@ -1,10 +1,26 @@
-// The file contents for the current environment will overwrite these during build.
-// The build system defaults to the dev environment which uses `environment.ts`, but if you do
-// `ng build --env=prod` then `environment.prod.ts` will be used instead.
-// The list of which env maps to which file can be found in `angular-cli.json`.
+import { Environment } from '@abp/ng.core';
+
+const baseUrl = 'http://localhost:4200';
 
 export const environment = {
-    production: false,
-    hmr: false,
-    appConfig: 'appconfig.json'
-};
+  production: false,
+  application: {
+    baseUrl,
+    name: 'VCBRDemo',
+    logoUrl: '',
+  },
+  oAuthConfig: {
+    issuer: 'https://localhost:44312/',
+    redirectUri: baseUrl,
+    clientId: 'VCBRDemo_App',
+    responseType: 'code',
+    scope: 'offline_access VCBRDemo',
+    requireHttps: true,
+  },
+  apis: {
+    default: {
+      url: 'https://localhost:44312',
+      rootNamespace: 'VCBRDemo',
+    },
+  },
+} as Environment;

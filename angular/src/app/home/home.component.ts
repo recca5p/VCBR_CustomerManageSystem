@@ -1,14 +1,19 @@
-import { Component, Injector, ChangeDetectionStrategy } from '@angular/core';
-import { AppComponentBase } from '@shared/app-component-base';
-import { appModuleAnimation } from '@shared/animations/routerTransition';
+import { AuthService } from '@abp/ng.core';
+import { Component } from '@angular/core';
 
 @Component({
+  selector: 'app-home',
   templateUrl: './home.component.html',
-  animations: [appModuleAnimation()],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent extends AppComponentBase {
-  constructor(injector: Injector) {
-    super(injector);
+export class HomeComponent {
+  get hasLoggedIn(): boolean {
+    return this.authService.isAuthenticated;
+  }
+
+  constructor(private authService: AuthService) {}
+
+  login() {
+    this.authService.navigateToLogin();
   }
 }
