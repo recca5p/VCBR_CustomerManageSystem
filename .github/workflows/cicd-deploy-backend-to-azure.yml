@@ -27,13 +27,13 @@ jobs:
       - name: Inject secrets to application
         uses: microsoft/variable-substitution@v1
         with:
-          files: './publish/**/appsettings.json'
+          files: '${{ github.workspace }}/aspnet-core/src/VoTanPhatVCBRDemo.Web.Host/appsettings.json'
         env:
           ConnectionStrings.Default: ${{ secrets.DATABASE_CONNRECTION_STRING }}
       - name: Inject secrects to application staging
         uses: microsoft/variable-substitution@v1
         with:
-          files: './publish/**/appsettings.Staging.json'
+          files: '${{ github.workspace }}/aspnet-core/src/VoTanPhatVCBRDemo.Web.Host/appsettings.Staging.json'
         env:
           ConnectionStrings.Default: ${{ secrets.DATABASE_CONNRECTION_STRING }}
       - name: Publish
