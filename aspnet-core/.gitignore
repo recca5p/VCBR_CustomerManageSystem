@@ -251,6 +251,15 @@ paket-files/
 .idea/
 *.sln.iml
 
-src/VoTanPhatVCBRDemo.Web.Mvc/secrets.json
-src/VoTanPhatVCBRDemo.Web.Host/secrets.json
-src/VoTanPhatVCBRDemo.Migrator/secrets.json
+# VCBRDemo
+src/VCBRDemo.Web/Logs/*
+src/VCBRDemo.Web.Host/Logs/*
+src/VCBRDemo.AuthServer/Logs/*
+src/VCBRDemo.HttpApi.Host/Logs/*
+src/VCBRDemo.HttpApi.Host/Logs/*
+src/VCBRDemo.DbMigrator/Logs/*
+src/VCBRDemo.Blazor.Server/Logs/*
+src/VCBRDemo.Blazor.Server.Tiered/Logs/*
+
+# Use abp install-libs to restore.
+**/wwwroot/libs/*
