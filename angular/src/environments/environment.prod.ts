@@ -10,16 +10,16 @@ export const environment = {
     logoUrl: '',
   },
   oAuthConfig: {
-    issuer: 'https://localhost:44312/',
+    issuer: 'https://vcbrdemohttpapihost20230714015827.azurewebsites.net/',
     redirectUri: baseUrl,
     clientId: 'VCBRDemo_App',
     responseType: 'code',
     scope: 'offline_access VCBRDemo',
-    requireHttps: true
+    requireHttps: true,
   },
   apis: {
     default: {
-      url: 'https://localhost:44312',
+      url: 'https://vcbrdemohttpapihost20230714015827.azurewebsites.net',
       rootNamespace: 'VCBRDemo',
     },
   },
