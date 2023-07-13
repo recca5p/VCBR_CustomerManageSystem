@@ -33,7 +33,7 @@ jobs:
       - name: Archive artifact
         uses: ihiroky/archive-action@v1
         with:
-          root_dir: dist
+          root_dir: ./dist
           file_path: publish.zip
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
