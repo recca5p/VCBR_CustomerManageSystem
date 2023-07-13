@@ -24,6 +24,18 @@ jobs:
         run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
       - name: Test
         run: dotnet test "${{ env.WORKING_DIRECTORY }}" --no-build
+      - name: Inject secrets to application
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: './publish/**/appsettings.json'
+        env:
+          ConnectionStrings.Default: ${{ secrets.DATABASE_CONNRECTION_STRING }}
+      - name: Inject secrects to application staging
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: './publish/**/appsettings.Staging.json'
+        env:
+          ConnectionStrings.Default: ${{ secrets.DATABASE_CONNRECTION_STRING }}
       - name: Publish
         run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
       - name: Publish Artifacts
