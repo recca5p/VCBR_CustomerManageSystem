@@ -1,4 +1,4 @@
-name: Build and deploy Backend on Azure2
+name: Build and deploy Backend on Azure
 run-name: "#${{ github.run_number }} - ${{ github.ref_name }} - ${{ github.sha }} - Backend"
 
 on:
