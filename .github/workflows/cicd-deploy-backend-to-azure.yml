@@ -18,10 +18,12 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
-      - name: Restore
-        run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
+      - name: Install abp
+        run: dotnet tool install -g Volo.Abp.Cli
       - name: Install abp libs
         run: abp install-libs "aspnet-core"
+      - name: Restore
+        run: dotnet restore "${{ env.WORKING_DIRECTORY }}"
       - name: Build
         run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
       - name: Test
