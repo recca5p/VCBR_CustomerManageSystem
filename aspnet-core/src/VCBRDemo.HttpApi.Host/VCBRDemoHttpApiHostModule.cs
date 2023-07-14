@@ -85,7 +85,6 @@ public class VCBRDemoHttpApiHostModule : AbpModule
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
         var configuration = context.Services.GetConfiguration();
-        PreConfigureOpenIddictServerBuilder(context);
         ConfigureAuthentication(context);
         ConfigureBundles();
         ConfigureUrls(configuration);
@@ -93,6 +92,7 @@ public class VCBRDemoHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+        context.Services.AddSameSiteCookiePolicy(); // cookie policy to deal with temporary browser incompatibilities
     }
 
     private void ConfigureAuthentication(ServiceConfigurationContext context)
@@ -255,15 +255,6 @@ public class VCBRDemoHttpApiHostModule : AbpModule
         });
     }
 
-    private void PreConfigureOpenIddictServerBuilder(ServiceConfigurationContext context)
-    {
-        PreConfigure<OpenIddictServerBuilder>(builder =>
-        {
-            builder.AddEncryptionCertificate("E4D2CBAA9E75A4CC8662D1DCEB42718FB2851BD3");
-            builder.AddSigningCertificate("E4D2CBAA9E75A4CC8662D1DCEB42718FB2851BD3");
-        });
-    }
-
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
     {
         var app = context.GetApplicationBuilder();
@@ -279,6 +270,7 @@ public class VCBRDemoHttpApiHostModule : AbpModule
         {
             app.UseErrorPage();
         }
+        app.UseCookiePolicy();
 
         app.UseCorrelationId();
         app.UseStaticFiles();
