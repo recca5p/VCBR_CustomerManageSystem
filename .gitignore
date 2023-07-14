@@ -13,3 +13,4 @@ aspnet-core/docker/mvc/Mvc-Logs/
 /aspnet-core/src/VoTanPhatVCBRDemo.EntityFrameworkCore/Migrations
 /angular/yarn-error.log
 /data
+/aspnet-core/src/VCBRDemo.HttpApi.Host/wwwroot/libs
