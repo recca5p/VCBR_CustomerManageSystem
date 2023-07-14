@@ -28,12 +28,12 @@ jobs:
         run: yarn install
       
       - name: Build
-        run: yarn run build
+        run: yarn run build:prod
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
         with:
           name: dev-package
-          path: ${{ github.workspace }}/angular/dist
+          path: ${{ github.workspace }}/angular/dist/VCBRDemo
 
   deploy:
     runs-on: ubuntu-latest
@@ -54,5 +54,5 @@ jobs:
         with:
           app-name: 'vtpdemo'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1B1A96AEB5374F0BA6AEDBD925E68621 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CDB197C05A8F426482170FEB810BA143 }}
           package: .
