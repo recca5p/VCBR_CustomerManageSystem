@@ -12,3 +12,4 @@ aspnet-core/docker/mvc/Mvc-Logs/
 
 /aspnet-core/src/VoTanPhatVCBRDemo.EntityFrameworkCore/Migrations
 /angular/yarn-error.log
+/data
