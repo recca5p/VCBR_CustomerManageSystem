@@ -10,7 +10,7 @@ export const environment = {
     logoUrl: '',
   },
   oAuthConfig: {
-    issuer: 'https://vcbrdemohttpapihost20230714015827.azurewebsites.net/',
+    issuer: 'https://vcbrdemohttpapihost20230714102118.azurewebsites.net/',
     redirectUri: baseUrl,
     clientId: 'VCBRDemo_App',
     responseType: 'code',
@@ -19,7 +19,7 @@ export const environment = {
   },
   apis: {
     default: {
-      url: 'https://vcbrdemohttpapihost20230714015827.azurewebsites.net',
+      url: 'https://vcbrdemohttpapihost20230714102118.azurewebsites.net',
       rootNamespace: 'VCBRDemo',
     },
   },
