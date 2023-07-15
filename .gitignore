@@ -14,3 +14,5 @@ aspnet-core/docker/mvc/Mvc-Logs/
 /angular/yarn-error.log
 /data
 /aspnet-core/src/VCBRDemo.HttpApi.Host/wwwroot/libs
+/aspnet-core/src/VCBRDemo.DbMigrator/appsettings.secrets.json
+/aspnet-core/src/VCBRDemo.HttpApi.Host/appsettings.secrets.json
