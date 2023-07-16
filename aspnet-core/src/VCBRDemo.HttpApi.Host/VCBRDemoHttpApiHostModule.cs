@@ -1,4 +1,4 @@
-    using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -33,6 +33,11 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Hosting.Internal;
 using Volo.Abp.OpenIddict;
+using Autofac.Core;
+using MongoDB.Driver;
+using MongoDB.Driver.Core.Configuration;
+using VCBRDemo.Customers;
+using VCBRDemo.Files.Interfaces;
 
 namespace VCBRDemo;
 
@@ -92,6 +97,12 @@ public class VCBRDemoHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+        ConfigureCookiePolicy(context);
+        context.Services.AddScoped<IFileAppService, FileAppService>();
+    }
+
+    private void ConfigureCookiePolicy(ServiceConfigurationContext context)
+    {
         context.Services.AddSameSiteCookiePolicy(); // cookie policy to deal with temporary browser incompatibilities
     }
 

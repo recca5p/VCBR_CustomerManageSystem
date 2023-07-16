@@ -40,7 +40,7 @@ export class CustomerService {
     this.restService.request<any, PagedResultDto<CustomerDTO>>({
       method: 'GET',
       url: '/api/app/customer',
-      params: { filter: input.filter, sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount },
+      params: { filter: input.filter, fromDate: input.fromDate, toDate: input.toDate, sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount },
     },
     { apiName: this.apiName,...config });
   

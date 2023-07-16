@@ -69,14 +69,16 @@ namespace VCBRDemo.Customers
                         input.SkipCount,
                         input.MaxResultCount,
                         input.Sorting,
+                        input.FromDate,
+                        input.ToDate,
                         input.Filter
                     );
                 if (customers.IsNullOrEmpty())
                     throw new UserFriendlyException("Data not found");
 
                 int totalCount = input.Filter == null
-                    ? await _customerRepository.CountAsync(c => c.IsActive == true)
-                    : await _customerRepository.CountAsync(customer => customer.FirstName.Contains(input.Filter));
+                    ? await _customerRepository.CountAsync(c => c.IsActive == true && (c.CreationTime >= input.FromDate && c.CreationTime <= input.ToDate))
+                    : await _customerRepository.CountAsync(customer => customer.FirstName.Contains(input.Filter) && (customer.CreationTime >= input.FromDate && customer.CreationTime <= input.ToDate)); 
                 
                 List<CustomerDTO> result = ObjectMapper.Map<List<Customer>, List<CustomerDTO>>(customers);
 
@@ -198,9 +200,20 @@ namespace VCBRDemo.Customers
                 }
 
                 await _customerRepository.UpdateAsync(customer);
+                /*Update AbpUser*/
             }
             catch (Exception ex)
             {
+                if (ex is Volo.Abp.Validation.AbpValidationException)
+                {
+                    var voloEx = new Volo.Abp.Validation.AbpValidationException();
+                    voloEx = (Volo.Abp.Validation.AbpValidationException)ex;
+                    var message = voloEx.ValidationErrors
+                        .Select(err => err.ToString())
+                        .Aggregate(string.Empty, (current, next) => string.Format("{0}\n{1}", current, next));
+                    throw new UserFriendlyException(message);
+
+                }
                 throw new UserFriendlyException(ex.Message);
             }
         }
@@ -219,15 +232,29 @@ namespace VCBRDemo.Customers
 
                 /*Inactive customer*/
                 customer.IsActive = false;
+
                 await _customerRepository.UpdateAsync(customer);
                 /*Inactive user account*/
                 IdentityUserDto userAcc = await _identityUserService.GetAsync(customer.UserId);
+
                 IdentityUserUpdateDto updateAcc = ObjectMapper.Map<IdentityUserDto, IdentityUserUpdateDto>(userAcc);
+
                 updateAcc.IsActive = false;
+
                 await _identityUserService.UpdateAsync(customer.UserId, updateAcc);
             }
             catch (Exception ex)
             {
+                if (ex is Volo.Abp.Validation.AbpValidationException)
+                {
+                    var voloEx = new Volo.Abp.Validation.AbpValidationException();
+                    voloEx = (Volo.Abp.Validation.AbpValidationException)ex;
+                    var message = voloEx.ValidationErrors
+                        .Select(err => err.ToString())
+                        .Aggregate(string.Empty, (current, next) => string.Format("{0}\n{1}", current, next));
+                    throw new UserFriendlyException(message);
+
+                }
                 throw new UserFriendlyException(ex.Message);
             }
         }

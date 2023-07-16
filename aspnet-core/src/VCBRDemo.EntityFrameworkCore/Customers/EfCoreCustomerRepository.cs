@@ -12,7 +12,7 @@ namespace VCBRDemo.Customers
 {
     public class EfCoreCustomerRepository : EfCoreRepository<VCBRDemoDbContext, Customer, Guid>, ICustomerRepository
     {
-        public EfCoreCustomerRepository(IDbContextProvider<VCBRDemoDbContext> dbContextProvider) : base(dbContextProvider) 
+        public EfCoreCustomerRepository(IDbContextProvider<VCBRDemoDbContext> dbContextProvider) :  base(dbContextProvider) 
         {
 
         }
@@ -27,8 +27,11 @@ namespace VCBRDemo.Customers
         public async Task<List<Customer>> GetListAsync(
             int skipCount,
             int maxResultCount,
-            string sorting,
-            string filter = null)
+            string sorting, 
+            DateTime fromDate,
+            DateTime toDate,
+            string filter = null
+            )
         {
             var dbSet = await GetDbSetAsync();
             return await dbSet
@@ -36,7 +39,7 @@ namespace VCBRDemo.Customers
                     !filter.IsNullOrWhiteSpace(),
                     customer => customer.IdentityNumber.Contains(filter)
                     )
-                .Where(c => c.IsActive == true)
+                .Where(c => c.IsActive == true && (c.CreationTime >= fromDate && c.CreationTime <= toDate))
                 .OrderBy(_ => sorting)
                 .Skip(skipCount)
                 .Take(maxResultCount)

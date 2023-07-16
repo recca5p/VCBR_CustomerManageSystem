@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCBRDemo.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace VCBRDemo.Migrations
 {
     [DbContext(typeof(VCBRDemoDbContext))]
-    partial class VCBRDemoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230716054720_importrequest")]
+    partial class importrequest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -125,7 +128,7 @@ namespace VCBRDemo.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FileId")
+                    b.Property<string>("FileLink")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -141,7 +144,11 @@ namespace VCBRDemo.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("LastModifierId");
 
-                    b.Property<string>("ReportId")
+                    b.Property<string>("ReportLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RequestFilter")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

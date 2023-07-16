@@ -3,7 +3,7 @@ import { ListService, PagedResultDto } from '@abp/ng.core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
-import { CustomerDTO } from '@proxy/customers/dtos';
+import { CustomerDTO, CustomerFilterListDTO } from '@proxy/customers/dtos';
 import { CustomerService } from '@proxy/customers';
 import { ConfigStateService } from '@abp/ng.core';
 

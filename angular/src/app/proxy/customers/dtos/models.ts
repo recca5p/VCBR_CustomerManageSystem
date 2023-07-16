@@ -24,10 +24,13 @@ export interface CustomerDTO extends EntityDto<string> {
   balance?: number;
   createdTime?: string;
   isActive?: boolean;
+  userId?: string;
 }
 
 export interface CustomerFilterListDTO extends PagedAndSortedResultRequestDto {
   filter?: string;
+  fromDate?: string;
+  toDate?: string;
 }
 
 export interface CustomerUpdateDTO {

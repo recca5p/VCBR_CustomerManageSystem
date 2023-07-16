@@ -24,6 +24,7 @@ export class CustomerInfoComponent implements OnInit {
   customer: CustomerDTO = {
     lastName: '',
     firstName: '',
+    userId: '',
   };
   form: FormGroup;
 
@@ -68,6 +69,7 @@ export class CustomerInfoComponent implements OnInit {
         [Validators.required, Validators.pattern(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)],
       ],
       phoneNumber: [this.selectedCustomer.phoneNumber],
+      balance: [this.customer.balance],
     });
   }
 

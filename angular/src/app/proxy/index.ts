@@ -1,2 +1,4 @@
+import * as Controllers from './controllers';
 import * as Customers from './customers';
-export { Customers };
+import * as Microsoft from './microsoft';
+export { Controllers, Customers, Microsoft };
