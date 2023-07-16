@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VCBRDemo.ExportRequests
 {
-    internal class ExportRequest
+    public class ExportRequest
     {
     }
 }
