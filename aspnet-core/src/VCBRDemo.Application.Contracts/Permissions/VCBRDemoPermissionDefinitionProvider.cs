@@ -21,6 +21,8 @@ public class VCBRDemoPermissionDefinitionProvider : PermissionDefinitionProvider
             VCBRDemoPermissions.Customers.Delete, L("Permission:Customers.Delete"));
         customersPermission.AddChild(
             VCBRDemoPermissions.Customers.GetInfo, L("Permission:Customers.GetInfo"));
+        customersPermission.AddChild(
+            VCBRDemoPermissions.Customers.GetList, L("Permission:Customers.GetList"));
     }
 
     private static LocalizableString L(string name)

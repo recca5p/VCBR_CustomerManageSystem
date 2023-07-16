@@ -13,5 +13,6 @@ public static class VCBRDemoPermissions
         public const string Edit = Default + ".Edit";
         public const string Delete = Default + ".Delete";
         public const string GetInfo = Default + ".GetInfo";
+        public const string GetList = Default + ".GetList";
     }
 }

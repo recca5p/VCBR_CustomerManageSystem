@@ -21,7 +21,7 @@ function configureRoutes(routesService: RoutesService) {
         iconClass: 'fas fa-user',
         order: 2,
         layout: eLayoutType.application,
-        requiredPolicy: 'VCBRDemo.Customers.Create',
+        requiredPolicy: 'VCBRDemo.Customers.GetList',
       },
       {
         path: '/customer-info',

@@ -42,5 +42,11 @@ namespace VCBRDemo.Customers
                 .Take(maxResultCount)
                 .ToListAsync();
         }
+
+        public async Task<Customer> FindByUserIdAsync(Guid userId)
+        {
+            var dbSet = await GetDbSetAsync();
+            return await dbSet.Where(c => c.UserId == userId).FirstOrDefaultAsync();
+        }
     }
 }

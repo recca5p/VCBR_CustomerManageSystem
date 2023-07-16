@@ -1,1 +1,160 @@
-<p>customer-info works!</p>
+<section class="vh-100" style="background-color: #f4f5f7">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="mb-4 col col-lg-6 mb-lg-0">
+        <div class="mb-3 card" style="border-radius: 0.5rem">
+          <div class="row g-0">
+            <div
+              class="text-center text-white col-md-4 gradient-custom"
+              style="border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem"
+            >
+              <img
+                src="https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png"
+                alt="Avatar"
+                class="my-5 img-fluid"
+                style="width: 80px; border-radius: 50%"
+              />
+              <h5 style="color: black">{{ customer.lastName }} {{ customer.firstName }}</h5>
+              <p style="color: black; font-style: italic">{{ customer.identityNumber }}</p>
+              <i class="mb-5 far fa-edit"></i>
+            </div>
+            <div class="col-md-8">
+              <div class="p-4 card-body">
+                <h6>Information</h6>
+                <hr class="mt-0 mb-4" />
+                <div class="pt-1 row">
+                  <div class="mb-3 col-6">
+                    <h6>Email</h6>
+                    <p class="text-muted">{{ customer.email }}</p>
+                  </div>
+                  <div class="mb-3 col-6">
+                    <h6>Phone</h6>
+                    <p class="text-muted">{{ customer.phoneNumber }}</p>
+                  </div>
+                </div>
+                <h6>{{ customer.address }}</h6>
+                <hr class="mt-0 mb-4" />
+                <div class="pt-1 row">
+                  <div class="mb-3 col-6">
+                    <h6>Gender</h6>
+                    <p class="text-muted">{{ customer.gender }}</p>
+                  </div>
+                  <div class="mb-3 col-6">
+                    <h6>Balance</h6>
+                    <p class="text-muted">{{ customer.balance }}</p>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-start">
+                  <button class="btn btn-primary" (click)="editCustomer()">Edit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<abp-modal [(visible)]="isModalOpen">
+  <ng-template #abpHeader>
+    <h3>{{ (selectedCustomer.identityNumber ? '::Edit' : '::New Customer') | abpLocalization }}</h3>
+  </ng-template>
+
+  <ng-template #abpBody>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-group">
+        <label for="customer-identityNumber">Identity Number</label
+        ><span style="color: red"> * </span>
+        <input
+          type="text"
+          id="customer-identityNumber"
+          class="form-control"
+          formControlName="identityNumber"
+          autofocus
+        />
+      </div>
+
+      <div class="form-group" *ngIf="!selectedCustomer.identityNumber">
+        <label for="customer-password">Password</label><span style="color: red"> * </span>
+        <input
+          type="password"
+          id="customer-password"
+          class="form-control"
+          formControlName="password"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="customer-firstName">First Name</label>
+        <input
+          type="text"
+          id="customer-firstName"
+          class="form-control"
+          formControlName="firstName"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="customer-lastName">Last Name</label>
+        <input type="text" id="customer-lastName" class="form-control" formControlName="lastName" />
+      </div>
+
+      <div class="form-group">
+        <label for="customer-gender">Gender</label><span style="color: red"> * </span>
+        <select id="customer-gender" class="form-control" formControlName="gender">
+          <option *ngFor="let gender of genderList" [value]="gender.value">
+            {{ gender.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="customer-address">Address</label>
+        <input type="text" id="customer-address" class="form-control" formControlName="address" />
+      </div>
+
+      <div class="form-group">
+        <label for="customer-email">Email</label><span style="color: red"> * </span>
+        <input type="text" id="customer-email" class="form-control" formControlName="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="customer-phoneNumber">Phone Number</label>
+        <input
+          type="text"
+          id="customer-phoneNumber"
+          class="form-control"
+          formControlName="phoneNumber"
+        />
+      </div>
+
+      <!-- <div class="form-group">
+        <label for="customer-balance">Balance</label><span style="color: red"> * </span>
+        <input type="number" id="customer-balance" class="form-control" formControlName="balance" />
+      </div> -->
+
+      <!-- <div class="mt-2">
+        <label>Birth date</label><span> * </span>
+        <input
+          #datepicker="ngbDatepicker"
+          class="form-control"
+          name="datepicker"
+          formControlName="birthDate"
+          ngbDatepicker
+          (click)="datepicker.toggle()"
+        />
+      </div> -->
+    </form>
+  </ng-template>
+
+  <ng-template #abpFooter>
+    <button type="button" class="btn" abpClose>
+      {{ '::Close' | abpLocalization }}
+    </button>
+
+    <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">
+      <i class="mr-1 fa fa-check"></i>
+      {{ '::Save' | abpLocalization }}
+    </button>
+  </ng-template>
+</abp-modal>

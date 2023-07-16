@@ -44,7 +44,7 @@ namespace VCBRDemo.Customers
         {
             try
             {
-                Customer customer = await _customerRepository.GetAsync(id);
+                Customer customer = await _customerRepository.FindByUserIdAsync(id);
                 if (customer == null)
                     throw new UserFriendlyException("Data not found");
                 return ObjectMapper.Map<Customer, CustomerDTO>(customer);
@@ -55,7 +55,7 @@ namespace VCBRDemo.Customers
             }
         }
 
-        [Authorize(VCBRDemoPermissions.Customers.Default)]
+        [Authorize(VCBRDemoPermissions.Customers.GetList)]
         public async Task<PagedResultDto<CustomerDTO>> GetListAsync(CustomerFilterListDTO input)
         {
             try
