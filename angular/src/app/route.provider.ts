@@ -15,6 +15,22 @@ function configureRoutes(routesService: RoutesService) {
         order: 1,
         layout: eLayoutType.application,
       },
+      {
+        path: '/customers',
+        name: 'Customer Management',
+        iconClass: 'fas fa-user',
+        order: 2,
+        layout: eLayoutType.application,
+        requiredPolicy: 'VCBRDemo.Customers.Create',
+      },
+      {
+        path: '/customer-info',
+        name: 'Info',
+        iconClass: 'fas fa-info',
+        order: 3,
+        layout: eLayoutType.application,
+        requiredPolicy: 'VCBRDemo.Customers.GetInfo',
+      },
     ]);
   };
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Authorization;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using VCBRDemo.Customers;
 using VCBRDemo.Customers.DTOs;
 using VCBRDemo.Customers.Interfaces;
+using VCBRDemo.Permissions;
 using Volo.Abp;
 using Volo.Abp.Account;
 using Volo.Abp.Application.Dtos;
@@ -22,6 +24,7 @@ namespace VCBRDemo.Customers
         private readonly ICustomerRepository _customerRepository;
         private readonly CustomerManager _customerManager;
         private readonly IIdentityUserAppService _identityUserService;
+        private readonly IAccountAppService _accountAppService;
 
         public CustomerAppService(
                 ICustomerRepository customerRepository,
@@ -33,8 +36,10 @@ namespace VCBRDemo.Customers
             _customerManager = customerManager;
             _customerRepository = customerRepository;
             _identityUserService = identityUserService;
+            _accountAppService = accountAppService;
         }
 
+        [Authorize(VCBRDemoPermissions.Customers.GetInfo)]
         public async Task<CustomerDTO> GetAsync(Guid id)
         {
             try
@@ -50,6 +55,7 @@ namespace VCBRDemo.Customers
             }
         }
 
+        [Authorize(VCBRDemoPermissions.Customers.Default)]
         public async Task<PagedResultDto<CustomerDTO>> GetListAsync(CustomerFilterListDTO input)
         {
             try
@@ -69,12 +75,14 @@ namespace VCBRDemo.Customers
                     throw new UserFriendlyException("Data not found");
 
                 int totalCount = input.Filter == null
-                    ? await _customerRepository.CountAsync()
+                    ? await _customerRepository.CountAsync(c => c.IsActive == true)
                     : await _customerRepository.CountAsync(customer => customer.FirstName.Contains(input.Filter));
+                
+                List<CustomerDTO> result = ObjectMapper.Map<List<Customer>, List<CustomerDTO>>(customers);
 
                 return new PagedResultDto<CustomerDTO>(
                         totalCount,
-                        ObjectMapper.Map<List<Customer>, List<CustomerDTO>>(customers));
+                        result);
             }
             catch (Exception ex)
             {
@@ -82,23 +90,29 @@ namespace VCBRDemo.Customers
             }
         }
 
+        [Authorize(VCBRDemoPermissions.Customers.Create)]
         public async Task<CustomerDTO> CreateAsync(CustomerCreateDTO input)
         {
             try
             {
-                /*Create AbpUser to generate an account for customer*/
-                IdentityUserCreateDto abpUserInfo = new IdentityUserCreateDto
+                /*Register AbpUser to generate an account for customer*/
+                RegisterDto accRes = new RegisterDto
                 {
-                    Email = input.Email,
+                    EmailAddress = input.Email,
                     UserName = input.IdentityNumber,
-                    Name = input.FirstName,
-                    Surname = input.LastName,
-                    PhoneNumber = input.PhoneNumber,
-                    Password = input.Password, 
+                    Password = input.Password,
+                    AppName = "VCBRDemo"
+                };
+
+                IdentityUserDto account = await _accountAppService.RegisterAsync(accRes);
+
+                /*Assign user role*/
+                IdentityUserUpdateRolesDto roles = new IdentityUserUpdateRolesDto
+                {
                     RoleNames = new string[] {"user"}
                 };
-                /*Always craete customer with role is user*/
-                IdentityUserDto account = await _identityUserService.CreateAsync(abpUserInfo);
+                /*Always assign "user" role*/
+                await _identityUserService.UpdateRolesAsync(account.Id, roles);
 
                 /*Create customer info*/
                 Customer customer = await _customerManager.CreateAsync(
@@ -134,6 +148,7 @@ namespace VCBRDemo.Customers
             }
         }
 
+        [Authorize(VCBRDemoPermissions.Customers.Edit)]
         public async Task UpdateAsync(string identityNumber, CustomerUpdateDTO input)
         {
             try
@@ -190,6 +205,7 @@ namespace VCBRDemo.Customers
             }
         }
 
+        [Authorize(VCBRDemoPermissions.Customers.Delete)]
         public async Task DeleteCustomerAsync(string identityNumber)
         {
             try
@@ -198,11 +214,17 @@ namespace VCBRDemo.Customers
                 if (customer == null)
                     throw new UserFriendlyException("The identity number is not exist");
 
-                if (customer.IsDeleted == true)
+                if (customer.IsActive == false)
                     throw new UserFriendlyException("The customer is disabled");
 
-                customer.IsDeleted = true;
+                /*Inactive customer*/
+                customer.IsActive = false;
                 await _customerRepository.UpdateAsync(customer);
+                /*Inactive user account*/
+                IdentityUserDto userAcc = await _identityUserService.GetAsync(customer.UserId);
+                IdentityUserUpdateDto updateAcc = ObjectMapper.Map<IdentityUserDto, IdentityUserUpdateDto>(userAcc);
+                updateAcc.IsActive = false;
+                await _identityUserService.UpdateAsync(customer.UserId, updateAcc);
             }
             catch (Exception ex)
             {

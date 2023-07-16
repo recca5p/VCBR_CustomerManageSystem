@@ -36,6 +36,7 @@ namespace VCBRDemo.Customers
                     !filter.IsNullOrWhiteSpace(),
                     customer => customer.IdentityNumber.Contains(filter)
                     )
+                .Where(c => c.IsActive == true)
                 .OrderBy(_ => sorting)
                 .Skip(skipCount)
                 .Take(maxResultCount)
