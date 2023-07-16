@@ -10,7 +10,5 @@ namespace VCBRDemo.Files.DTOs
     {
         [Required]
         public IFormFile File { get; set; }
-        [Required]
-        public Guid UserId { get; set; }
     }
 }

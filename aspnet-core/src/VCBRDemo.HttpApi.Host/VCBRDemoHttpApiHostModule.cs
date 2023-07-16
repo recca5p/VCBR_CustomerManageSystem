@@ -38,6 +38,8 @@ using MongoDB.Driver;
 using MongoDB.Driver.Core.Configuration;
 using VCBRDemo.Customers;
 using VCBRDemo.Files.Interfaces;
+using VCBRDemo.ImportRequests.Interfaces;
+using VCBRDemo.ImportRequests;
 
 namespace VCBRDemo;
 
@@ -98,7 +100,12 @@ public class VCBRDemoHttpApiHostModule : AbpModule
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
         ConfigureCookiePolicy(context);
+        ConfigureAddScopedService(context);
+    }
+    public void ConfigureAddScopedService(ServiceConfigurationContext context)
+    {
         context.Services.AddScoped<IFileAppService, FileAppService>();
+        context.Services.AddScoped<IImportRequestAppService, ImportRequestAppService>();
     }
 
     private void ConfigureCookiePolicy(ServiceConfigurationContext context)

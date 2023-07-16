@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VCBRDemo.Customers;
 using VCBRDemo.Files;
+using VCBRDemo.ImportRequests;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;

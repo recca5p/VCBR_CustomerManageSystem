@@ -12,9 +12,11 @@ using System.Threading.Tasks;
 using VCBRDemo.Customers.DTOs;
 using VCBRDemo.Files.DTOs;
 using VCBRDemo.Files.Interfaces;
+using Volo.Abp;
 
 namespace VCBRDemo.Customers
 {
+    [RemoteService(IsEnabled = false)]
     public class FileAppService : IFileAppService
     {
         private readonly string _bucketName;
@@ -27,7 +29,7 @@ namespace VCBRDemo.Customers
             _configuration = configuration;
         }
 
-        public async Task<UploadFileResponseDTO> UploadFileAsync(IFormFile file)
+        public async Task<UploadFileResponseDTO> UploadFileAsync(IFormFile file, string key)
         {
             try
             {
@@ -37,7 +39,6 @@ namespace VCBRDemo.Customers
                 var bucketName = _configuration["AWS:BucketName"];
                 var s3Client = new AmazonS3Client(accesskey, secretkey, bucketRegion);
                 var fileTransferUtility = new TransferUtility(s3Client);//create an object for TransferUtility
-                string key = file.Name + DateTime.Now.ToString();
 
                 using (var stream = file.OpenReadStream())
                 {
