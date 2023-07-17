@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using System.Collections.Generic;
+using System.Linq;
 using VCBRDemo.Customers;
 using VCBRDemo.Customers.DTOs;
 using VCBRDemo.ImportRequests;

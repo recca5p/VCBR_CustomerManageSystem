@@ -10,5 +10,6 @@ namespace VCBRDemo.ImportRequests.Interfaces
     public interface IImportRequestAppService : IApplicationService
     {
         Task<ImportRequestDTO> ImportCustomersByFileAsync(ImportRequestCreateDTO file);
+        Task<byte[]> ImportDataIntoDatabaseAsync (ImportRequestCreateDTO file);
     }
 }

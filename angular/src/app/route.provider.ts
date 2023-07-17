@@ -29,7 +29,7 @@ function configureRoutes(routesService: RoutesService) {
         iconClass: 'fas fa-info',
         order: 3,
         layout: eLayoutType.application,
-        requiredPolicy: 'VCBRDemo.Customers.GetInfo',
+        requiredPolicy: 'VCBRDemo.Customers.DetailInfo',
       },
     ]);
   };

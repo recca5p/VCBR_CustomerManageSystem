@@ -40,6 +40,8 @@ using VCBRDemo.Customers;
 using VCBRDemo.Files.Interfaces;
 using VCBRDemo.ImportRequests.Interfaces;
 using VCBRDemo.ImportRequests;
+using VCBRDemo.ExportRequests.Interfaces;
+using VCBRDemo.ExportRequests;
 
 namespace VCBRDemo;
 
@@ -106,6 +108,7 @@ public class VCBRDemoHttpApiHostModule : AbpModule
     {
         context.Services.AddScoped<IFileAppService, FileAppService>();
         context.Services.AddScoped<IImportRequestAppService, ImportRequestAppService>();
+        context.Services.AddScoped<IExportRequestAppService, ExportRequestAppService>();
     }
 
     private void ConfigureCookiePolicy(ServiceConfigurationContext context)

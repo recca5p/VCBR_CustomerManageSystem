@@ -95,10 +95,6 @@ export class CustomerComponent implements OnInit {
       lastName: [this.selectedCustomer.lastName],
       gender: [this.selectedCustomer.gender || Validators.required],
       address: [this.selectedCustomer.address],
-      email: [
-        this.selectedCustomer.email || '',
-        [Validators.required, Validators.pattern(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)],
-      ],
       phoneNumber: [this.selectedCustomer.phoneNumber],
       balance: [
         this.selectedCustomer.balance || '',
@@ -129,6 +125,7 @@ export class CustomerComponent implements OnInit {
           this.isModalOpen = false;
           this.form.reset();
           this.list.get();
+          window.location.reload();
         });
     } else {
       this.customerService.create(this.form.value).subscribe(() => {

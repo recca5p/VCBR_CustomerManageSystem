@@ -55,6 +55,14 @@ namespace VCBRDemo.Customers
             }
         }
 
+        public async Task<CustomerDTO> FindByIdentityNumberAsync(string identityNumber)
+        {
+            Customer customer = await _customerRepository.FindByIdentityNumberAsync(identityNumber);
+
+            return ObjectMapper.Map<Customer, CustomerDTO>(customer);
+        }
+
+
         [Authorize(VCBRDemoPermissions.Customers.GetList)]
         public async Task<PagedResultDto<CustomerDTO>> GetListAsync(CustomerFilterListDTO input)
         {

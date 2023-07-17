@@ -25,6 +25,8 @@ public class VCBRDemoPermissionDefinitionProvider : PermissionDefinitionProvider
             VCBRDemoPermissions.Customers.GetList, L("Permission:Customers.GetList"));
         customersPermission.AddChild(
             VCBRDemoPermissions.Customers.ImportFile, L("Permission:Customers.ImportFile"));
+        customersPermission.AddChild(
+            VCBRDemoPermissions.Customers.DetailInfo, L("Permission:Customers.DetailInfo"));
     }
 
     private static LocalizableString L(string name)
