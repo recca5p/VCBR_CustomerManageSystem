@@ -45,13 +45,5 @@ namespace VCBRDemo.Controllers
                 return new BadRequestObjectResult(ex.Message);
             }
         }
-
-        [HttpGet("key")]
-        public async Task<IActionResult> DownloadS3File(string key)
-        {
-            var result = await _fileAppService.DownloadFileAsync(key);
-
-            return File(result.FileStream, result.ContentType, key);
-        }
     }
 }
