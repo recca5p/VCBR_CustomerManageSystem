@@ -82,17 +82,49 @@ namespace VCBRDemo.Customers
                         input.SkipCount,
                         input.MaxResultCount,
                         input.Sorting,
-                        input.FromDate,
-                        input.ToDate,
                         input.Filter
                     );
                 if (customers.IsNullOrEmpty())
                     throw new UserFriendlyException("Data not found");
 
                 int totalCount = input.Filter == null
-                    ? await _customerRepository.CountAsync(c => c.IsActive == true && (c.CreationTime >= input.FromDate && c.CreationTime <= input.ToDate))
-                    : await _customerRepository.CountAsync(customer => customer.FirstName.Contains(input.Filter) && (customer.CreationTime >= input.FromDate && customer.CreationTime <= input.ToDate)); 
+                    ? await _customerRepository.CountAsync(c => c.IsActive == true)
+                    : await _customerRepository.CountAsync(customer => customer.IdentityNumber.Contains(input.Filter) || customer.Email.Contains(input.Filter)); 
                 
+                List<CustomerDTO> result = ObjectMapper.Map<List<Customer>, List<CustomerDTO>>(customers);
+
+                return new PagedResultDto<CustomerDTO>(
+                        totalCount,
+                        result);
+            }
+            catch (Exception ex)
+            {
+                throw new UserFriendlyException(ex.Message);
+            }
+        }
+        [RemoteService(IsEnabled = false)]
+        public async Task<PagedResultDto<CustomerDTO>> GetListForWorkerAsync(CustomerFilterListDTO input)
+        {
+            try
+            {
+                if (input.Sorting.IsNullOrWhiteSpace())
+                {
+                    input.Sorting = nameof(Customer.FirstName);
+                }
+
+                List<Customer> customers = await _customerRepository.GetListAsync(
+                        input.SkipCount,
+                        input.MaxResultCount,
+                        input.Sorting,
+                        input.Filter
+                    );
+                if (customers.IsNullOrEmpty())
+                    throw new UserFriendlyException("Data not found");
+
+                int totalCount = input.Filter == null
+                    ? await _customerRepository.CountAsync(c => c.IsActive == true)
+                    : await _customerRepository.CountAsync(customer => customer.IdentityNumber.Contains(input.Filter) || customer.Email.Contains(input.Filter));
+
                 List<CustomerDTO> result = ObjectMapper.Map<List<Customer>, List<CustomerDTO>>(customers);
 
                 return new PagedResultDto<CustomerDTO>(

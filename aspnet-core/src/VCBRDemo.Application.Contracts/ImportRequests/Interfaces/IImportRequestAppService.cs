@@ -14,6 +14,6 @@ namespace VCBRDemo.ImportRequests.Interfaces
         Task<ImportRequestResponseDTO> ImportCustomersByFileAsync(ImportRequestCreateDTO file);
         Task<ImportDataIntoDatabaseDTO> ImportDataIntoDatabaseAsync(byte[] fileArray);
         Task<ImportRequestDTO> GetEarliestImportrequestAsync();
-        Task<ImportRequestResponseDTO> UpdateImportRequestStatusAsync(Guid importRequestId, ImportRequestStatusEnum status, string reportId);
+        Task<ImportRequestResponseDTO> UpdateImportRequestAsync(Guid importRequestId, ImportRequestStatusEnum status, string reportId, string result);
     }
 }

@@ -9,6 +9,6 @@ namespace VCBRDemo.ExportRequests
 {
     public interface IExportRequestRepository : IRepository<ExportRequest, Guid>
     {
-
+        Task<ExportRequest> GetEarliestExportRequestAsync();
     }
 }

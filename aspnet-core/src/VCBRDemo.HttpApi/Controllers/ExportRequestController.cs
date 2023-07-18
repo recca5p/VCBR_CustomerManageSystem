@@ -25,7 +25,7 @@ namespace VCBRDemo.Controllers
         public async Task<IActionResult> CreateExportRequest (ExportRequestCreateDTO model)
         {
             var res = await _exportRequestAppService.CreateExportRequestAsync(model);
-            return null;
+            return new JsonResult(res);
         }
     }
 }

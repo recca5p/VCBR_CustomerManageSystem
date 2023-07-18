@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using VCBRDemo.Customers;
 using VCBRDemo.Customers.DTOs;
+using VCBRDemo.ExportRequests;
+using VCBRDemo.ExportRequests.DTOs;
 using VCBRDemo.ImportRequests;
 using VCBRDemo.ImportRequests.DTOs;
 using Volo.Abp.Identity;
@@ -22,5 +24,6 @@ public class VCBRDemoApplicationAutoMapperProfile : Profile
         CreateMap<CustomerCreateDTO, Customer>();
         CreateMap<IdentityUserDto, IdentityUserUpdateDto>();
         CreateMap<ImportRequest, ImportRequestDTO>();
+        CreateMap<ExportRequest, ExportRequestDTO>();
     }
 }

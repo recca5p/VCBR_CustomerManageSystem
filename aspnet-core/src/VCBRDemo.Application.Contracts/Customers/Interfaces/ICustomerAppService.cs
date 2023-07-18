@@ -12,6 +12,7 @@ namespace VCBRDemo.Customers.Interfaces
     {
         Task<CustomerDTO> GetAsync (Guid id);
         Task<PagedResultDto<CustomerDTO>> GetListAsync(CustomerFilterListDTO input);
+        Task<PagedResultDto<CustomerDTO>> GetListForWorkerAsync(CustomerFilterListDTO input);
         Task<CustomerDTO> CreateAsync (CustomerCreateDTO input);
         Task UpdateAsync(string identityNumber, CustomerUpdateDTO input);
         Task DeleteCustomerAsync (string identityNumber);

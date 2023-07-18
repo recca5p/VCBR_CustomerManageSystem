@@ -10,7 +10,7 @@ namespace VCBRDemo.Customers
     public interface ICustomerRepository : IRepository<Customer, Guid>
     {
         Task<Customer> FindByIdentityNumberAsync(string identityNumber);
-        Task<List<Customer>> GetListAsync(int skipCount, int maxResultCount, string sorting, DateTime fromDate, DateTime toDate, string? filter);
+        Task<List<Customer>> GetListAsync(int skipCount, int maxResultCount, string sorting, string? filter);
         Task<Customer> FindByUserIdAsync(Guid userId);
         void AddCustomerToUserRole(Guid userId);
     }

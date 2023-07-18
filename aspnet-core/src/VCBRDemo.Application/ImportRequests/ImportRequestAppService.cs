@@ -112,14 +112,19 @@ namespace VCBRDemo.ImportRequests
             return importRequestDTO;
         }
 
-        public async Task<ImportRequestResponseDTO> UpdateImportRequestStatusAsync(Guid importRequestId, ImportRequestStatusEnum status, string reportId)
+        public async Task<ImportRequestResponseDTO> UpdateImportRequestAsync(Guid importRequestId, ImportRequestStatusEnum status, string reportId, string result)
         {
             ImportRequest importRequest = await _importRequestRepository.GetAsync(importRequestId);
 
             importRequest.RequestStatus = status;
-            if(reportId != null)
+            if(!reportId.IsNullOrEmpty())
             {
                 importRequest.ReportId = reportId;
+            }
+
+            if(!result.IsNullOrEmpty())
+            {
+                importRequest.Result = result;
             }
 
             await _importRequestRepository.UpdateAsync(importRequest);
@@ -175,10 +180,6 @@ namespace VCBRDemo.ImportRequests
                     CustomerDTO res = await _customerAppService.CreateUsingByWorkerAsync(createCustomer);
                     result.Add(res);
                 }
-                //foreach (var user in result)
-                //{
-                //    _customerRepository.AddCustomerToUserRole((Guid)user.UserId);
-                //}
                 // Create the Excel workbook
                 Workbook workbook = new Workbook();
 

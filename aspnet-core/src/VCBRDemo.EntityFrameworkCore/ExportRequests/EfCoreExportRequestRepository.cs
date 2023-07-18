@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,16 @@ namespace VCBRDemo.ExportRequests
     {
         public EfCoreExportRequestRepository(IDbContextProvider<VCBRDemoDbContext> dbContextProvider) : base(dbContextProvider)
         {
+        }
+
+        public async Task<ExportRequest> GetEarliestExportRequestAsync()
+        {
+            var dbset = await GetDbSetAsync();
+
+            return await dbset
+                .Where(_ => _.RequestStatus == ExportRequestStatusEnum.Created)
+                .OrderBy(_ => _.CreationTime)
+                .FirstOrDefaultAsync();
         }
     }
 }

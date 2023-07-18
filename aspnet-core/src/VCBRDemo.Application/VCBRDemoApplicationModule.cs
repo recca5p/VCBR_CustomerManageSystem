@@ -41,6 +41,15 @@ namespace VCBRDemo;
             q.AddJobAndTrigger<ImportDataJob>(context.Services.GetConfiguration());
         });
 
+        context.Services.AddQuartz(q =>
+        {
+            q.UseMicrosoftDependencyInjectionScopedJobFactory();
+
+            // Register the job, loading the schedule from configuration
+            q.AddJobAndTrigger<ExportDataJob>(context.Services.GetConfiguration());
+        });
+
+
         context.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
     }
 }

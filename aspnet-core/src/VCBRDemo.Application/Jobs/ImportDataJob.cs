@@ -48,7 +48,7 @@ namespace VCBRDemo.Jobs
             try
             {
                 //update status to begin process
-                ImportRequestResponseDTO beginProcess = await _importRequestAppService.UpdateImportRequestStatusAsync(importRequest.Id, ImportRequestStatusEnum.Executing, null);
+                ImportRequestResponseDTO beginProcess = await _importRequestAppService.UpdateImportRequestAsync(importRequest.Id, ImportRequestStatusEnum.Executing, null, null);
 
                 //download from s3
                 DownloadFileResponseDTO file = await _fileAppService.DownloadFileAsync(importRequest.FileId);
@@ -73,7 +73,7 @@ namespace VCBRDemo.Jobs
                 _customerAppService.AddCustomerToUserRole(result.userIds);
 
                 //update status to sucesss
-                ImportRequestResponseDTO successProcess = await _importRequestAppService.UpdateImportRequestStatusAsync(importRequest.Id, ImportRequestStatusEnum.Success, key);
+                ImportRequestResponseDTO successProcess = await _importRequestAppService.UpdateImportRequestAsync(importRequest.Id, ImportRequestStatusEnum.Success, key, "Import success, please view report file for more detail");
                 //delete the source report on s3
                 await _fileAppService.DeleteFileAsync(importRequest.FileId);
                 return;
@@ -81,7 +81,7 @@ namespace VCBRDemo.Jobs
             catch (Exception ex)
             {
                 //update status to failed
-                ImportRequestResponseDTO failProcess = await _importRequestAppService.UpdateImportRequestStatusAsync(importRequest.Id, ImportRequestStatusEnum.Failed, null);
+                ImportRequestResponseDTO failProcess = await _importRequestAppService.UpdateImportRequestAsync(importRequest.Id, ImportRequestStatusEnum.Failed, null, ex.Message);
             }
 }
     }

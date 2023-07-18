@@ -32,9 +32,7 @@ namespace VCBRDemo.Customers
         public async Task<List<Customer>> GetListAsync(
             int skipCount,
             int maxResultCount,
-            string sorting, 
-            DateTime fromDate,
-            DateTime toDate,
+            string sorting,
             string filter = null
             )
         {
@@ -42,9 +40,8 @@ namespace VCBRDemo.Customers
             return await dbSet
                 .WhereIf(
                     !filter.IsNullOrWhiteSpace(),
-                    customer => customer.IdentityNumber.Contains(filter)
+                    customer => customer.IdentityNumber.Contains(filter) || customer.Email.Contains(filter)
                     )
-                .Where(c => c.IsActive == true && (c.CreationTime >= fromDate && c.CreationTime <= toDate))
                 .OrderBy(_ => sorting)
                 .Skip(skipCount)
                 .Take(maxResultCount)

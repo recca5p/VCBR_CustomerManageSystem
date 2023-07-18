@@ -6,6 +6,7 @@ import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { CustomerDTO, CustomerFilterListDTO } from '@proxy/customers/dtos';
 import { CustomerService } from '@proxy/customers';
 import { ConfigStateService } from '@abp/ng.core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 @Component({
   selector: 'app-author',

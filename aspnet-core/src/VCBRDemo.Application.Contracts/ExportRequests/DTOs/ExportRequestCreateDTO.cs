@@ -7,7 +7,8 @@ using VCBRDemo.Files.DTOs;
 
 namespace VCBRDemo.ExportRequests.DTOs
 {
-    public class ExportRequestCreateDTO : CustomerFilterListDTO
+    public class ExportRequestCreateDTO
     {
+        public string Filter { get; set; }
     }
 }
