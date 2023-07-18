@@ -6008,6 +6008,16 @@ ng-zorro-antd@^16.0.0:
     date-fns "^2.16.1"
     tslib "^2.3.0"
 
+ng-zorro-antd@^16.1.0:
+  version "16.1.0"
+  resolved "https://registry.yarnpkg.com/ng-zorro-antd/-/ng-zorro-antd-16.1.0.tgz#46b49ed5ba4fef898959c1c84f04553cdfc1d128"
+  integrity sha512-+KjXoA0+v/liTtVIHswmOAzB9UaGADrO1tL9AOZsTLq5sZM8+DmhtixGRoSMD8HkkhpMFhsgEIxoHlkxtn1SXg==
+  dependencies:
+    "@angular/cdk" "^16.0.0"
+    "@ant-design/icons-angular" "^16.0.0"
+    date-fns "^2.16.1"
+    tslib "^2.3.0"
+
 nice-napi@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/nice-napi/-/nice-napi-1.0.2.tgz#dc0ab5a1eac20ce548802fc5686eaa6bc654927b"

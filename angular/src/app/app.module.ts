@@ -1,3 +1,4 @@
+import { NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { AccountConfigModule } from '@abp/ng.account/config';
 import { CoreModule } from '@abp/ng.core';
 import { registerLocale } from '@abp/ng.core/locale';

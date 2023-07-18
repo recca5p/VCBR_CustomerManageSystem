@@ -26,10 +26,10 @@
           <input
             type="text"
             id="identity-search"
-            class="form-control"
-            name="identity-search"
-            ngModel
-            placeholder="Enter identity number"
+            class="form control"
+            placeholder="Name"
+            (keyup.enter)="list.get()"
+            [(ngModel)]="searchParams.filter"
           />
         </div>
         <button id="search" class="btn btn-primary" type="button" style="margin-top: 5%">

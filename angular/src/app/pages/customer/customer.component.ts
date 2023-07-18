@@ -28,8 +28,10 @@ export class CustomerComponent implements OnInit {
     { name: 'Female', value: 'Female' },
   ];
 
+  searchParams = {} as CustomerFilterListDTO;
+
   constructor(
-    public readonly list: ListService,
+    public readonly list: ListService<CustomerFilterListDTO>,
     private customerService: CustomerService,
     private fb: FormBuilder,
     private confirmation: ConfirmationService,
@@ -37,15 +39,11 @@ export class CustomerComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // params as CustomerFilterListDTO = {
-
-    // }
-    // this.customerService.getList(params).subscribe(response => {
-    //   this.customer = response;
-    // })
-    const customerStreamCreator = query => this.customerService.getList(query);
+    const customerStreamCreator = query =>
+      this.customerService.getList({ ...query, ...this.searchParams });
     this.list.hookToQuery(customerStreamCreator).subscribe(response => {
       this.customer = response;
+      console.log(this.customer);
     });
   }
 
