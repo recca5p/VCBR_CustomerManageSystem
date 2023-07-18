@@ -12,5 +12,6 @@ namespace VCBRDemo.Customers
         Task<Customer> FindByIdentityNumberAsync(string identityNumber);
         Task<List<Customer>> GetListAsync(int skipCount, int maxResultCount, string sorting, DateTime fromDate, DateTime toDate, string? filter);
         Task<Customer> FindByUserIdAsync(Guid userId);
+        void AddCustomerToUserRole(Guid userId);
     }
 }

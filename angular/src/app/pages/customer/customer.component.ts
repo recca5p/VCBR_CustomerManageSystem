@@ -17,6 +17,7 @@ export class CustomerComponent implements OnInit {
   customer = { items: [], totalCount: 0 } as PagedResultDto<CustomerDTO>;
 
   isModalOpen = false;
+  isModalOpenEdit = false;
 
   form: FormGroup;
 
@@ -36,8 +37,13 @@ export class CustomerComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const customerStreamCreator = query => this.customerService.getList(query);
+    // params as CustomerFilterListDTO = {
 
+    // }
+    // this.customerService.getList(params).subscribe(response => {
+    //   this.customer = response;
+    // })
+    const customerStreamCreator = query => this.customerService.getList(query);
     this.list.hookToQuery(customerStreamCreator).subscribe(response => {
       this.customer = response;
     });
@@ -90,7 +96,6 @@ export class CustomerComponent implements OnInit {
 
   buildEditForm() {
     this.form = this.fb.group({
-      identityNumber: [this.selectedCustomer.identityNumber || '', Validators.required],
       firstName: [this.selectedCustomer.firstName],
       lastName: [this.selectedCustomer.lastName],
       gender: [this.selectedCustomer.gender || Validators.required],

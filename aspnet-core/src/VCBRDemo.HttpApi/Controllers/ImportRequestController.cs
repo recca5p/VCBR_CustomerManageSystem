@@ -31,7 +31,23 @@ namespace VCBRDemo.Controllers
         {
             try
             {
-                var result = await _importRequestAppService.ImportCustomersByFileAsync(model);
+                // Check if a file is provided
+                var file = model.File;
+                if (file == null || file.Length <= 0)
+                {
+                    return new BadRequestObjectResult("No file provided.");
+                }
+
+                // Ensure the file has valid extensions
+                var allowedExtensions = new[] { ".xls", ".xlsx", ".csv", ".txt" };
+                var fileExtension = Path.GetExtension(file.FileName);
+                if (!allowedExtensions.Contains(fileExtension.ToLower()))
+                {
+                    return new BadRequestObjectResult("Invalid file extension. Only Excel, CSV, and text files are allowed.");
+                }
+
+                ImportRequestResponseDTO result = await _importRequestAppService.ImportCustomersByFileAsync(model);
+
                 if (result.Id == 1)
                 {
                     return new JsonResult(result);
@@ -52,28 +68,15 @@ namespace VCBRDemo.Controllers
         {
             try
             {
-                // Check if a file is provided
-                var file = model.File;
-                if (file == null || file.Length <= 0)
-                {
-                    return new BadRequestObjectResult("No file provided.");
-                }
+                //DateTime now = DateTime.Now;
+                //long ticks = now.Ticks;
 
-                // Ensure the file has valid extensions
-                var allowedExtensions = new[] { ".xls", ".xlsx", ".csv", ".txt" };
-                var fileExtension = Path.GetExtension(file.FileName);
-                if (!allowedExtensions.Contains(fileExtension.ToLower()))
-                {
-                    return new BadRequestObjectResult("Invalid file extension. Only Excel, CSV, and text files are allowed.");
-                }
-                DateTime now = DateTime.Now;
-                long ticks = now.Ticks;
-
-                string key = $"{now.ToString("yyyyMMddHHmmssfff")}{ticks.ToString().Trim()}{file.FileName}";
-                key = key.Replace(" ", ""); // Remove any spaces
-                // Proceed with importing the file
-                byte[] result = await _importRequestAppService.ImportDataIntoDatabaseAsync(model);
-                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{key}ImportReport.xlsx");
+                //string key = $"{now.ToString("yyyyMMddHHmmssfff")}{ticks.ToString().Trim()}{file.FileName}";
+                //key = key.Replace(" ", ""); // Remove any spaces
+                //// Proceed with importing the file
+                //byte[] result = await _importRequestAppService.ImportDataIntoDatabaseAsync(model);
+                //return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{key}ImportReport.xlsx");
+                return null;
                 
             }
             catch (Exception ex)

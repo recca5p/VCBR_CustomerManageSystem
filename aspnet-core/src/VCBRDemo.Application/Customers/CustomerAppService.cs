@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using VCBRDemo.Customers;
@@ -23,20 +24,23 @@ namespace VCBRDemo.Customers
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly CustomerManager _customerManager;
-        private readonly IIdentityUserAppService _identityUserService;
+        private readonly IIdentityUserRepository _identityUserRepository;
         private readonly IAccountAppService _accountAppService;
-
+        private readonly IIdentityUserAppService _identityUserService;
         public CustomerAppService(
                 ICustomerRepository customerRepository,
                 CustomerManager customerManager,
-                IIdentityUserAppService identityUserService,
-                IAccountAppService accountAppService
+                IIdentityUserRepository identityUserRepository,
+                IAccountAppService accountAppService    ,
+                IIdentityUserAppService identityUserService
+
             )
         {
             _customerManager = customerManager;
             _customerRepository = customerRepository;
-            _identityUserService = identityUserService;
+            _identityUserRepository = identityUserRepository;
             _accountAppService = accountAppService;
+            _identityUserService = identityUserService;
         }
 
         [Authorize(VCBRDemoPermissions.Customers.GetInfo)]
@@ -55,6 +59,7 @@ namespace VCBRDemo.Customers
             }
         }
 
+        [RemoteService(IsEnabled = false)]
         public async Task<CustomerDTO> FindByIdentityNumberAsync(string identityNumber)
         {
             Customer customer = await _customerRepository.FindByIdentityNumberAsync(identityNumber);
@@ -119,10 +124,61 @@ namespace VCBRDemo.Customers
                 /*Assign user role*/
                 IdentityUserUpdateRolesDto roles = new IdentityUserUpdateRolesDto
                 {
-                    RoleNames = new string[] {"user"}
+                    RoleNames = new string[] { "user" }
                 };
                 /*Always assign "user" role*/
-                await _identityUserService.UpdateRolesAsync(account.Id, roles);
+                
+                /*Create customer info*/
+                Customer customer = await _customerManager.CreateAsync(
+                    input.FirstName,
+                    input.LastName,
+                    (CustomerGenderEnum)input.Gender,
+                    input.Address,
+                    input.Email,
+                    input.IdentityNumber,
+                    input.PhoneNumber,
+                    (double)input.Balance,
+                    account.Id,
+                    true
+                );
+
+                await _customerRepository.InsertAsync(customer);
+
+                return ObjectMapper.Map<Customer, CustomerDTO>(customer);
+            }
+            catch (Exception ex)
+            {
+                if (ex is Volo.Abp.Validation.AbpValidationException)
+                {
+                    var voloEx = new Volo.Abp.Validation.AbpValidationException();
+                    voloEx = (Volo.Abp.Validation.AbpValidationException)ex;
+                    var message = voloEx.ValidationErrors
+                        .Select(err => err.ToString())
+                        .Aggregate(string.Empty, (current, next) => string.Format("{0}\n{1}", current, next));
+                    throw new UserFriendlyException(message);
+
+                }
+                throw new UserFriendlyException(ex.Message);
+            }
+        }
+        [RemoteService(IsEnabled = false)]
+        public async Task<CustomerDTO> CreateUsingByWorkerAsync(CustomerCreateDTO input)
+        {
+            try
+            {
+                /*Register AbpUser to generate an account for customer*/
+                RegisterDto accRes = new RegisterDto
+                {
+                    EmailAddress = input.Email,
+                    UserName = input.IdentityNumber,
+                    Password = input.Password,
+                    AppName = "VCBRDemo"
+                };
+
+                IdentityUserDto account = await _accountAppService.RegisterAsync(accRes);
+
+                /*Assign user role*/
+                //_customerRepository.AddCustomerToUserRole(account.Id);
 
                 /*Create customer info*/
                 Customer customer = await _customerManager.CreateAsync(
@@ -157,6 +213,7 @@ namespace VCBRDemo.Customers
                 throw new UserFriendlyException(ex.Message);
             }
         }
+
 
         [Authorize(VCBRDemoPermissions.Customers.Edit)]
         public async Task UpdateAsync(string identityNumber, CustomerUpdateDTO input)
@@ -264,6 +321,21 @@ namespace VCBRDemo.Customers
 
                 }
                 throw new UserFriendlyException(ex.Message);
+            }
+        }
+        [RemoteService(IsEnabled = false)]
+        public void AddCustomerToUserRole(List<Guid> userIds)
+        {
+            try
+            {
+                foreach (Guid userId in userIds)
+                {
+                    _customerRepository.AddCustomerToUserRole(userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

@@ -9,5 +9,6 @@ namespace VCBRDemo.ImportRequests
 {
     public interface IImportRequestRepository : IRepository<ImportRequest, Guid>
     {
+        Task<ImportRequest> GetEarliestImportrequestAsync();
     }
 }

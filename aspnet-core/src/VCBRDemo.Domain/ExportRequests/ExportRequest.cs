@@ -9,8 +9,6 @@ namespace VCBRDemo.ExportRequests
 {
     public class ExportRequest : AuditedEntity<Guid>
     {
-        public string Filename { get; set; }
-        public string Extension { get; set; }
         public string Filter { get; set; }
         public string FileId { get; set; }
         public ExportRequestStatusEnum RequestStatus { get; set; }

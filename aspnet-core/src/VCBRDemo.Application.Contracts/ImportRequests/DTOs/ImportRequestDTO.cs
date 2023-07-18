@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using VCBRDemo.Files;
+using Volo.Abp.Application.Dtos;
 
 namespace VCBRDemo.ImportRequests.DTOs
 {
-    public class ImportRequestDTO
+    public class ImportRequestDTO : AuditedEntityDto<Guid>
     {
-        public int Id { get; set; }
-        public string Message { get; set; }
+        public string FileId { get; set; }
     }
 }

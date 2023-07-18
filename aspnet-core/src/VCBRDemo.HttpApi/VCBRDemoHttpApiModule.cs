@@ -1,6 +1,7 @@
 ﻿using Localization.Resources.AbpUi;
 using VCBRDemo.Localization;
 using Volo.Abp.Account;
+using Volo.Abp.BackgroundWorkers.Quartz;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
 using Volo.Abp.Localization;

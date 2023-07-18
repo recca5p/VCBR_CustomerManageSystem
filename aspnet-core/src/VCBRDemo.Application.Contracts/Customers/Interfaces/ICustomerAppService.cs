@@ -16,5 +16,7 @@ namespace VCBRDemo.Customers.Interfaces
         Task UpdateAsync(string identityNumber, CustomerUpdateDTO input);
         Task DeleteCustomerAsync (string identityNumber);
         Task<CustomerDTO> FindByIdentityNumberAsync(string identityNumber);
+        Task<CustomerDTO> CreateUsingByWorkerAsync(CustomerCreateDTO input);
+        void AddCustomerToUserRole(List<Guid> userIds);
     }
 }

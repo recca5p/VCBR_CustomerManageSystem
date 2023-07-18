@@ -4,6 +4,8 @@ public static class VCBRDemoPermissions
 {
     public const string GroupName = "VCBRDemo";
 
+    public static object AbpIdentity { get; set; }
+
     //Add your own permission names. Example:
     //public const string MyPermission1 = GroupName + ".MyPermission1";
     public static class Customers

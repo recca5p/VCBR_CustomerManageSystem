@@ -42,6 +42,7 @@ using VCBRDemo.ImportRequests.Interfaces;
 using VCBRDemo.ImportRequests;
 using VCBRDemo.ExportRequests.Interfaces;
 using VCBRDemo.ExportRequests;
+using Aspose.Cells.Charts;
 
 namespace VCBRDemo;
 
@@ -69,6 +70,8 @@ public class VCBRDemoHttpApiHostModule : AbpModule
                 options.UseAspNetCore();
             });
         });
+
+
 
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
@@ -109,6 +112,7 @@ public class VCBRDemoHttpApiHostModule : AbpModule
         context.Services.AddScoped<IFileAppService, FileAppService>();
         context.Services.AddScoped<IImportRequestAppService, ImportRequestAppService>();
         context.Services.AddScoped<IExportRequestAppService, ExportRequestAppService>();
+        context.Services.AddControllers().AddNewtonsoftJson();
     }
 
     private void ConfigureCookiePolicy(ServiceConfigurationContext context)

@@ -14,8 +14,8 @@ namespace VCBRDemo.Files.Interfaces
     {
         Task<DownloadFileResponseDTO> DownloadFileAsync(string key);
 
-        Task<UploadFileResponseDTO> UploadFileAsync(IFormFile file, string key);
+        Task<UploadFileResponseDTO> UploadFileAsync(byte[] file, string key, string contentType);
 
-        //Task<bool> DeleteFileAsync(string fileName, string versionId = "");
+        Task<DeleteFileResponseDTO> DeleteFileAsync(string key);
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Aspose.Cells;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,6 +19,8 @@ using VCBRDemo.ImportRequests.DTOs;
 using VCBRDemo.ImportRequests.Interfaces;
 using Volo.Abp;
 using Volo.Abp.Identity;
+using Volo.Abp.Uow;
+using ZstdSharp.Unsafe;
 
 namespace VCBRDemo.ImportRequests
 {
@@ -26,20 +30,24 @@ namespace VCBRDemo.ImportRequests
         private readonly IImportRequestRepository _importRequestRepository;
         private readonly IFileAppService _fileAppService;
         private readonly ICustomerAppService _customerAppService;
-        private readonly IIdentityUserAppService _identityUserAppService;
+        private readonly IIdentityUserRepository _identityUserRepository;
+        private readonly ICustomerRepository _customerRepository;
 
         public ImportRequestAppService(IImportRequestRepository importRequestRepository,
             IFileAppService fileAppService,
             ICustomerAppService customerAppService,
-            IIdentityUserAppService identityUserAppService)
+            IIdentityUserAppService identityUserAppService,
+            IIdentityUserRepository identityUserRepository,
+            ICustomerRepository customerRepository)
         {
             _importRequestRepository = importRequestRepository;
             _fileAppService = fileAppService;
             _customerAppService = customerAppService;
-            _identityUserAppService = identityUserAppService;
+            _identityUserRepository = identityUserRepository;
+            _customerRepository = customerRepository;
         }
 
-        public async Task<ImportRequestDTO> ImportCustomersByFileAsync(ImportRequestCreateDTO file)
+        public async Task<ImportRequestResponseDTO> ImportCustomersByFileAsync(ImportRequestCreateDTO file)
         {
             try
             {
@@ -60,11 +68,18 @@ namespace VCBRDemo.ImportRequests
                 };
 
                 ImportRequest createRes = await _importRequestRepository.InsertAsync(importRequest);
-                /*Try to upload file requested to s3*/
-                UploadFileResponseDTO result = await _fileAppService.UploadFileAsync(file.File, key);
+
+                byte[] fileBytes;
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    await file.File.CopyToAsync(memoryStream);
+                    fileBytes = memoryStream.ToArray();
+                }                /*Try to upload file requested to s3*/
+                UploadFileResponseDTO result = await _fileAppService.UploadFileAsync(fileBytes, key, file.File.ContentType);
                 if (result.Success)
                 {
-                    return new ImportRequestDTO
+                    return new ImportRequestResponseDTO
                     {
                         Id = 1,
                         Message = "Create success"
@@ -75,7 +90,7 @@ namespace VCBRDemo.ImportRequests
                     createRes.RequestStatus = Files.ImportRequestStatusEnum.Failed;
                     createRes.Result = "Upload on S3 failed";
                     await _importRequestRepository.UpdateAsync(createRes);
-                    return new ImportRequestDTO
+                    return new ImportRequestResponseDTO
                     {
                         Id = -1,
                         Message = "Upload on S3 failed"
@@ -88,68 +103,114 @@ namespace VCBRDemo.ImportRequests
             }
         }
 
-        public async Task<byte[]> ImportDataIntoDatabaseAsync(ImportRequestCreateDTO file)
+        public async Task<ImportRequestDTO> GetEarliestImportrequestAsync()
         {
-            if (!ValidateExcelTemplate(file.File.OpenReadStream()))
+            ImportRequest importRequest = await _importRequestRepository.GetEarliestImportrequestAsync();
+
+            ImportRequestDTO importRequestDTO = ObjectMapper.Map<ImportRequest, ImportRequestDTO>(importRequest);
+
+            return importRequestDTO;
+        }
+
+        public async Task<ImportRequestResponseDTO> UpdateImportRequestStatusAsync(Guid importRequestId, ImportRequestStatusEnum status, string reportId)
+        {
+            ImportRequest importRequest = await _importRequestRepository.GetAsync(importRequestId);
+
+            importRequest.RequestStatus = status;
+            if(reportId != null)
             {
-                throw new Exception("Invalid Excel template.");
+                importRequest.ReportId = reportId;
             }
-            var (successList, failureList) = ReadExcelData(file.File.OpenReadStream());
 
-            List<CustomerDTO> result = new List<CustomerDTO>();
+            await _importRequestRepository.UpdateAsync(importRequest);
 
-            foreach (CustomerInsertDTO entity in successList)
+            return new ImportRequestResponseDTO
             {
-                //Check is the identitynumber exist, if yes insert into failure list
-                CustomerDTO customerExisting = await _customerAppService.FindByIdentityNumberAsync(entity.IdentityNumber);
-                IdentityUserDto emailExisting = await _identityUserAppService.FindByEmailAsync(entity.Email);
+                Id = 1,
+                Message = "Update status success"
+            };
+        }
 
-                if (customerExisting != null || emailExisting != null) 
+        public async Task<ImportDataIntoDatabaseDTO> ImportDataIntoDatabaseAsync(byte[] fileArray)
+        {
+            try
+            {
+                Stream file = new MemoryStream(fileArray);
+
+                if (!ValidateExcelTemplate(file))
                 {
-                    entity.ImportStatus = ImportRequestStatusEnum.Failed;
-                    entity.Message = "Customer existings, please check email or identity number";
-                    failureList.Add(entity);
-                    continue;
+                    throw new Exception("Invalid Excel template.");
                 }
-                CustomerCreateDTO createCustomer = new CustomerCreateDTO
+                var (successList, failureList) = ReadExcelData(file);
+
+                List<CustomerDTO> result = new List<CustomerDTO>();
+
+                foreach (CustomerInsertDTO entity in successList)
                 {
-                    FirstName = entity.FirstName,
-                    LastName = entity.LastName,
-                    Gender = (CustomerGenderEnum)entity.Gender,
-                    Email = entity.Email,
-                    Address = entity.Address,
-                    PhoneNumber = entity.PhoneNumber,
-                    IdentityNumber = entity.IdentityNumber,
-                    Balance = entity.Balance,
-                    Password = $"{entity.IdentityNumber}Customer*",
-                    // Map other properties accordingly
+                    //Check is the identitynumber exist, if yes insert into failure list
+                    CustomerDTO customerExisting = await _customerAppService.FindByIdentityNumberAsync(entity.IdentityNumber);
+                    IdentityUser emailExisting = await _identityUserRepository.FindByNormalizedEmailAsync(entity.Email.ToUpper());
+
+                    if (customerExisting != null || emailExisting != null)
+                    {
+                        entity.ImportStatus = ImportRequestStatusEnum.Failed;
+                        entity.Message = "Customer existings, please check email or identity number";
+                        failureList.Add(entity);
+                        continue;
+                    }
+                    CustomerCreateDTO createCustomer = new CustomerCreateDTO
+                    {
+                        FirstName = entity.FirstName,
+                        LastName = entity.LastName,
+                        Gender = (CustomerGenderEnum)entity.Gender,
+                        Email = entity.Email,
+                        Address = entity.Address,
+                        PhoneNumber = entity.PhoneNumber,
+                        IdentityNumber = entity.IdentityNumber,
+                        Balance = entity.Balance,
+                        Password = $"{entity.IdentityNumber}Customer*",
+                        // Map other properties accordingly
+                    };
+
+                    CustomerDTO res = await _customerAppService.CreateUsingByWorkerAsync(createCustomer);
+                    result.Add(res);
+                }
+                //foreach (var user in result)
+                //{
+                //    _customerRepository.AddCustomerToUserRole((Guid)user.UserId);
+                //}
+                // Create the Excel workbook
+                Workbook workbook = new Workbook();
+
+                // Create the worksheets for result list and failure list
+                Worksheet resultSheet = workbook.Worksheets.Add("Result");
+                Worksheet failureSheet = workbook.Worksheets.Add("Failure");
+
+                // Fill the result list sheet with the data from the result list
+                FillWorksheetWithData(resultSheet, result);
+
+                // Fill the failure list sheet with the data from the failure list
+                FillWorksheetWithData(failureSheet, failureList);
+
+                // Convert the workbook to a byte array
+                byte[] excelData;
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    workbook.Save(stream, SaveFormat.Xlsx);
+                    excelData = stream.ToArray();
+                }
+                ImportDataIntoDatabaseDTO returnResult = new ImportDataIntoDatabaseDTO
+                {
+                    fileBytes = excelData,
+                    userIds = result.Select(_ => _.UserId).ToList()
                 };
 
-                CustomerDTO res = await _customerAppService.CreateAsync(createCustomer);
-                result.Add(res);
+                return returnResult;
             }
-            // Create the Excel workbook
-            Workbook workbook = new Workbook();
-
-            // Create the worksheets for result list and failure list
-            Worksheet resultSheet = workbook.Worksheets.Add("Result");
-            Worksheet failureSheet = workbook.Worksheets.Add("Failure");
-
-            // Fill the result list sheet with the data from the result list
-            FillWorksheetWithData(resultSheet, result);
-
-            // Fill the failure list sheet with the data from the failure list
-            FillWorksheetWithData(failureSheet, failureList);
-
-            // Convert the workbook to a byte array
-            byte[] excelData;
-            using (MemoryStream stream = new MemoryStream())
+            catch (Exception ex)
             {
-                workbook.Save(stream, SaveFormat.Xlsx);
-                excelData = stream.ToArray();
+                throw new Exception(ex.Message);
             }
-
-            return excelData;
         }
 
         private void FillWorksheetWithData<T>(Worksheet worksheet, List<T> dataList)

@@ -125,7 +125,7 @@
 
   <ng-template #abpBody>
     <form [formGroup]="form" (ngSubmit)="save()">
-      <div class="form-group">
+      <div class="form-group" *ngIf="!selectedCustomer.identityNumber">
         <label for="customer-identityNumber">Identity Number</label
         ><span style="color: red"> * </span>
         <input
@@ -138,7 +138,7 @@
       </div>
 
       <div class="form-group" *ngIf="!selectedCustomer.identityNumber">
-        <label for="customer-password">Password</label><span style="color: red"> * </span>
+        <label for="customer-password">Password</label>
         <input
           type="password"
           id="customer-password"
@@ -163,7 +163,8 @@
       </div>
 
       <div class="form-group">
-        <label for="customer-gender">Gender</label><span style="color: red"> * </span>
+        <label for="customer-gender">Gender</label
+        ><span style="color: red" *ngIf="!selectedCustomer.identityNumber"> * </span>
         <select id="customer-gender" class="form-control" formControlName="gender">
           <option *ngFor="let gender of genderList" [value]="gender.value">
             {{ gender.name }}
@@ -176,7 +177,7 @@
         <input type="text" id="customer-address" class="form-control" formControlName="address" />
       </div>
 
-      <div class="form-group">
+      <div class="form-group" *ngIf="!selectedCustomer.identityNumber">
         <label for="customer-email">Email</label><span style="color: red"> * </span>
         <input type="text" id="customer-email" class="form-control" formControlName="email" />
       </div>
