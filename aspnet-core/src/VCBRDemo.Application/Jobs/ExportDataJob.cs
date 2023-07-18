@@ -74,7 +74,7 @@ namespace VCBRDemo.Jobs
                 DateTime now = DateTime.Now;
                 long ticks = now.Ticks;
 
-                string key = $"{now.ToString("yyyyMMddHHmmssfff")}{ticks.ToString().Trim()}_Import_Report";
+                string key = $"{now.ToString("yyyyMMddHHmmssfff")}{ticks.ToString().Trim()}_Export_Report";
                 key = key.Replace(" ", ""); // Remove any spaces
 
                 _fileAppSerivce.UploadFileAsync(excelData, key, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
