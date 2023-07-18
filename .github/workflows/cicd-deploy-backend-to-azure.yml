@@ -28,12 +28,30 @@ jobs:
         run: dotnet build "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
       - name: Test
         run: dotnet test "${{ env.WORKING_DIRECTORY }}" --no-build
-      - name: Inject secrets to application
+      - name: Inject DB secrets to application
         uses: microsoft/variable-substitution@v1
         with:
           files: "${{ github.workspace }}/aspnet-core/src/VCBRDemo.HttpApi.Host/appsettings.json"
         env:
           ConnectionStrings.Default: ${{ secrets.DATABASE_CONNRECTION_STRING }}
+      - name: Inject AWSKeyId secrets to application
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: "${{ github.workspace }}/aspnet-core/src/VCBRDemo.HttpApi.Host/appsettings.json"
+        env:
+          AWS.AwsAccessKey: ${{ secrets.AWSACCESSKEY }}
+      - name: Inject AWSKey secrets to application
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: "${{ github.workspace }}/aspnet-core/src/VCBRDemo.HttpApi.Host/appsettings.json"
+        env:
+          AWS.AwsSecretAccessKey: ${{ secrets.AWSSECRETACCESSKEY }}
+      - name: Inject BucketName secrets to application
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: "${{ github.workspace }}/aspnet-core/src/VCBRDemo.HttpApi.Host/appsettings.json"
+        env:
+          AWS.BucketName: ${{ secrets.BUCKETNAME }}
       - name: Publish
         run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
       - name: Publish Artifacts
