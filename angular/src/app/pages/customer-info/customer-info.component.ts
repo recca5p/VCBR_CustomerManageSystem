@@ -85,6 +85,7 @@ export class CustomerInfoComponent implements OnInit {
           this.isModalOpen = false;
           this.form.reset();
           this.list.get();
+          window.location.reload();
         });
     }
   }

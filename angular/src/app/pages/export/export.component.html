@@ -30,8 +30,6 @@
       [list]="list"
       default
     >
-      <ngx-datatable-column [name]="'::Status' | abpLocalization" prop="requestStatus">
-      </ngx-datatable-column>
       <ngx-datatable-column [width]="300" [name]="'::Note' | abpLocalization" prop="result">
       </ngx-datatable-column>
       <ngx-datatable-column [name]="'::Created At' | abpLocalization" prop="creationTime">
@@ -41,10 +39,7 @@
       </ngx-datatable-column>
       <ngx-datatable-column [name]="'::Report' | abpLocalization">
         <ng-template let-row="row" ngx-datatable-cell-template>
-          <a
-            *ngIf="row.reportId !== '' || row.reportId !== null"
-            (click)="download(row.fileId)"
-            style="color: aqua"
+          <a *ngIf="row.fileId !== null" (click)="download(row.fileId)" style="color: aqua"
             >Download</a
           >
         </ng-template>

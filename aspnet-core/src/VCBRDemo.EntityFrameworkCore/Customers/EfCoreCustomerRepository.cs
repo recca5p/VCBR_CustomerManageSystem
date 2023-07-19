@@ -43,7 +43,7 @@ namespace VCBRDemo.Customers
                     customer => customer.IdentityNumber.Contains(filter) || customer.Email.Contains(filter)
                     )
                 .Where(_ => _.IsActive == true)
-                .OrderBy(_ => sorting)
+                .OrderByDescending(_ => _.CreationTime)
                 .Skip(skipCount)
                 .Take(maxResultCount)
                 .ToListAsync();
