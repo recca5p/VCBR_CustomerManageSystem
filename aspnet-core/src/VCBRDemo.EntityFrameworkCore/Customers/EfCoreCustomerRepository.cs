@@ -42,6 +42,7 @@ namespace VCBRDemo.Customers
                     !filter.IsNullOrWhiteSpace(),
                     customer => customer.IdentityNumber.Contains(filter) || customer.Email.Contains(filter)
                     )
+                .Where(_ => _.IsActive == true)
                 .OrderBy(_ => sorting)
                 .Skip(skipCount)
                 .Take(maxResultCount)

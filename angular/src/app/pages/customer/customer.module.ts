@@ -9,17 +9,10 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 
 @NgModule({
   declarations: [CustomerComponent],
-  imports: [
-    SharedModule,
-    CommonModule,
-    CustomerRoutingModule,
-    NgbDatepickerModule,
-    MatNativeDateModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-  ],
+  imports: [SharedModule, CommonModule, CustomerRoutingModule],
 })
 export class CustomerModule {}

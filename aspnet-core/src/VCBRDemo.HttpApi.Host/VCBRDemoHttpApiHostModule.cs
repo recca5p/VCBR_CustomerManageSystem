@@ -296,7 +296,6 @@ public class VCBRDemoHttpApiHostModule : AbpModule
             app.UseErrorPage();
         }
         app.UseCookiePolicy();
-
         app.UseCorrelationId();
         app.UseStaticFiles();
         app.UseRouting();
@@ -324,6 +323,9 @@ public class VCBRDemoHttpApiHostModule : AbpModule
 
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
-        app.UseConfiguredEndpoints();
+        app.UseConfiguredEndpoints(endpoints =>
+        {
+            endpoints.MapHub<ImportRequestHub>("/signalr-hub");
+        });
     }
 }

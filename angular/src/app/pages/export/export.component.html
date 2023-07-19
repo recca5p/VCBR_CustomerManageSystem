@@ -1,0 +1,54 @@
+<div class="card">
+  <div class="card-header">
+    <div class="row">
+      <div class="col col-md-6">
+        <h5 class="card-title">
+          {{ '::Import Request' | abpLocalization }}
+        </h5>
+      </div>
+      <div class="text-end col col-md-6">
+        <div class="pt-2 text-lg-end">
+          <button
+            *abpPermission="'VCBRDemo.Customers.Create'"
+            id="create"
+            class="btn btn-primary"
+            type="button"
+            (click)="createExport()"
+          >
+            <i class="fa fa-plus me-1"></i>
+            <span>{{ '::Export' | abpLocalization }}</span>
+          </button>
+        </div>
+      </div>
+      <div class="text-end col col-md-6"></div>
+    </div>
+  </div>
+  <div class="card-body">
+    <ngx-datatable
+      [rows]="exportRequests.items"
+      [count]="exportRequests.totalCount"
+      [list]="list"
+      default
+    >
+      <ngx-datatable-column [name]="'::Status' | abpLocalization" prop="requestStatus">
+      </ngx-datatable-column>
+      <ngx-datatable-column [width]="300" [name]="'::Note' | abpLocalization" prop="result">
+      </ngx-datatable-column>
+      <ngx-datatable-column [name]="'::Created At' | abpLocalization" prop="creationTime">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          {{ row.creationTime | shortDateTime }}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [name]="'::Report' | abpLocalization">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <a
+            *ngIf="row.reportId !== '' || row.reportId !== null"
+            (click)="download(row.fileId)"
+            style="color: aqua"
+            >Download</a
+          >
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+  </div>
+</div>

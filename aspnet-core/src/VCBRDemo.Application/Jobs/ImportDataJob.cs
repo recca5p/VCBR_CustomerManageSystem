@@ -1,6 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using System;
@@ -13,6 +13,7 @@ using VCBRDemo.Customers.Interfaces;
 using VCBRDemo.Files;
 using VCBRDemo.Files.DTOs;
 using VCBRDemo.Files.Interfaces;
+using VCBRDemo.ImportRequests;
 using VCBRDemo.ImportRequests.DTOs;
 using VCBRDemo.ImportRequests.Interfaces;
 using VCBRDemo.Permissions;
@@ -28,16 +29,18 @@ namespace VCBRDemo.Jobs
         private readonly IImportRequestAppService _importRequestAppService;
         private readonly IFileAppService _fileAppService;
         private readonly ICustomerAppService _customerAppService;
-
+        private readonly IHubContext<ImportRequestHub> _hubContext;
         public ImportDataJob(IImportRequestAppService importRequestAppService,
             IFileAppService fileAppService,
-            ICustomerAppService customerAppService)
+            ICustomerAppService customerAppService,
+            IHubContext<ImportRequestHub> hubContext)
         {
             _importRequestAppService = importRequestAppService;
             _fileAppService = fileAppService;
             JobDetail = JobBuilder.Create<ImportDataJob>().WithIdentity("AbpIdentity.Users").Build();
             Trigger = TriggerBuilder.Create().WithIdentity("AbpIdentity.Users").StartNow().Build();
             _customerAppService = customerAppService;
+            _hubContext = hubContext;
         }
         public override async Task Execute(IJobExecutionContext context)
         {
@@ -47,6 +50,8 @@ namespace VCBRDemo.Jobs
                 return;
             try
             {
+                await _hubContext.Clients.All.SendAsync("Import status updated", importRequest);
+
                 //update status to begin process
                 ImportRequestResponseDTO beginProcess = await _importRequestAppService.UpdateImportRequestAsync(importRequest.Id, ImportRequestStatusEnum.Executing, null, null);
 

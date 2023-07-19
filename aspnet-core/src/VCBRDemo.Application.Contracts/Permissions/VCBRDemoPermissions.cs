@@ -19,5 +19,7 @@ public static class VCBRDemoPermissions
         public const string ImportFile = Default + ".ImportFile";
         public const string DetailInfo = Default + ".DetailInfo";
         public const string ExportFile = Default + ".ExportFile";
+        public const string ImportCrud = Default + ".ImportCrud";
+        public const string ExportCrud = Default + ".ExportCrud";
     }
 }

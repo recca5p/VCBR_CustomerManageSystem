@@ -1,6 +1,5 @@
 ﻿using Aspose.Cells;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,15 +16,18 @@ using VCBRDemo.Files.DTOs;
 using VCBRDemo.Files.Interfaces;
 using VCBRDemo.ImportRequests.DTOs;
 using VCBRDemo.ImportRequests.Interfaces;
+using VCBRDemo.Permissions;
 using Volo.Abp;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Identity;
 using Volo.Abp.Uow;
 using ZstdSharp.Unsafe;
 
 namespace VCBRDemo.ImportRequests
 {
-    [RemoteService(IsEnabled = false)]
-    public class ImportRequestAppService : VCBRDemoAppService, IImportRequestAppService
+    public class ImportRequestAppService : CrudAppService<ImportRequest, ImportCRUDDTO, Guid, PagedAndSortedResultRequestDto, ImportRequest>, IImportRequestAppService
     {
         private readonly IImportRequestRepository _importRequestRepository;
         private readonly IFileAppService _fileAppService;
@@ -33,20 +35,26 @@ namespace VCBRDemo.ImportRequests
         private readonly IIdentityUserRepository _identityUserRepository;
         private readonly ICustomerRepository _customerRepository;
 
-        public ImportRequestAppService(IImportRequestRepository importRequestRepository,
+        public ImportRequestAppService(IRepository<ImportRequest, Guid> repository,
+            IImportRequestRepository importRequestRepository,
             IFileAppService fileAppService,
             ICustomerAppService customerAppService,
             IIdentityUserAppService identityUserAppService,
             IIdentityUserRepository identityUserRepository,
-            ICustomerRepository customerRepository)
+            ICustomerRepository customerRepository) : base(repository)
         {
             _importRequestRepository = importRequestRepository;
             _fileAppService = fileAppService;
             _customerAppService = customerAppService;
             _identityUserRepository = identityUserRepository;
             _customerRepository = customerRepository;
+            GetListPolicyName = VCBRDemoPermissions.Customers.ImportFile;
+            GetPolicyName = VCBRDemoPermissions.Customers.ImportCrud;
+            CreatePolicyName = VCBRDemoPermissions.Customers.ImportCrud;
+            UpdatePolicyName = VCBRDemoPermissions.Customers.ImportCrud;
+            DeletePolicyName = VCBRDemoPermissions.Customers.ImportCrud;
         }
-
+        [RemoteService(IsEnabled = false)]
         public async Task<ImportRequestResponseDTO> ImportCustomersByFileAsync(ImportRequestCreateDTO file)
         {
             try
@@ -102,7 +110,7 @@ namespace VCBRDemo.ImportRequests
                 throw new Exception(ex.Message);
             }
         }
-
+        [RemoteService(IsEnabled = false)]
         public async Task<ImportRequestDTO> GetEarliestImportrequestAsync()
         {
             ImportRequest importRequest = await _importRequestRepository.GetEarliestImportrequestAsync();
@@ -111,7 +119,7 @@ namespace VCBRDemo.ImportRequests
 
             return importRequestDTO;
         }
-
+        [RemoteService(IsEnabled = false)]
         public async Task<ImportRequestResponseDTO> UpdateImportRequestAsync(Guid importRequestId, ImportRequestStatusEnum status, string reportId, string result)
         {
             ImportRequest importRequest = await _importRequestRepository.GetAsync(importRequestId);
@@ -135,7 +143,7 @@ namespace VCBRDemo.ImportRequests
                 Message = "Update status success"
             };
         }
-
+        [RemoteService(IsEnabled = false)]
         public async Task<ImportDataIntoDatabaseDTO> ImportDataIntoDatabaseAsync(byte[] fileArray)
         {
             try
@@ -213,7 +221,7 @@ namespace VCBRDemo.ImportRequests
                 throw new Exception(ex.Message);
             }
         }
-
+        [RemoteService(IsEnabled = false)]
         private void FillWorksheetWithData<T>(Worksheet worksheet, List<T> dataList)
         {
             if (dataList.Count > 0)
@@ -223,7 +231,7 @@ namespace VCBRDemo.ImportRequests
                 cells.ImportDataTable(dataTable, true, 0, 0);
             }
         }
-
+        [RemoteService(IsEnabled = false)]
         private DataTable ListToDataTable<T>(List<T> list)
         {
             PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(T));
@@ -248,7 +256,7 @@ namespace VCBRDemo.ImportRequests
 
             return dataTable;
         }
-
+        [RemoteService(IsEnabled = false)]
         private (List<CustomerInsertDTO> successList, List<CustomerInsertDTO> failureList) ReadExcelData(Stream fileStream)
         {
             List<CustomerInsertDTO> successList = new List<CustomerInsertDTO>();
@@ -318,7 +326,7 @@ namespace VCBRDemo.ImportRequests
 
             return (successList, failureList);
         }
-
+        [RemoteService(IsEnabled = false)]
         private bool ValidateExcelTemplate(Stream fileStream)
         {
             // Load the Excel file using Aspose.Cells

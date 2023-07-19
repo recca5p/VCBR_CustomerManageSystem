@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,6 +28,7 @@ namespace VCBRDemo.Controllers
         }
 
         [HttpPost]
+        [Authorize(Permissions.VCBRDemoPermissions.Customers.ImportFile)]
         public async Task<IActionResult> ImportCustomersByFileAsync([FromForm] ImportRequestCreateDTO model)
         {
             try
@@ -39,7 +41,7 @@ namespace VCBRDemo.Controllers
                 }
 
                 // Ensure the file has valid extensions
-                var allowedExtensions = new[] { ".xls", ".xlsx", ".csv", ".txt" };
+                var allowedExtensions = new[] { ".xls", ".xlsx", ".csv" };
                 var fileExtension = Path.GetExtension(file.FileName);
                 if (!allowedExtensions.Contains(fileExtension.ToLower()))
                 {
@@ -56,28 +58,6 @@ namespace VCBRDemo.Controllers
                 {
                     return new BadRequestObjectResult("Create request failed");
                 }
-            }
-            catch (Exception ex)
-            {
-                return new BadRequestObjectResult(ex.Message);
-            }
-        }
-
-        [HttpPost("ImportFileIntoDatabase")]
-        public async Task<IActionResult> ImportFileIntoDatabase([FromForm] ImportRequestCreateDTO model)
-        {
-            try
-            {
-                //DateTime now = DateTime.Now;
-                //long ticks = now.Ticks;
-
-                //string key = $"{now.ToString("yyyyMMddHHmmssfff")}{ticks.ToString().Trim()}{file.FileName}";
-                //key = key.Replace(" ", ""); // Remove any spaces
-                //// Proceed with importing the file
-                //byte[] result = await _importRequestAppService.ImportDataIntoDatabaseAsync(model);
-                //return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{key}ImportReport.xlsx");
-                return null;
-                
             }
             catch (Exception ex)
             {

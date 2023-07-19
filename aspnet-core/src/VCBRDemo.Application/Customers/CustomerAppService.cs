@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,13 +29,16 @@ namespace VCBRDemo.Customers
         private readonly IIdentityUserRepository _identityUserRepository;
         private readonly IAccountAppService _accountAppService;
         private readonly IIdentityUserAppService _identityUserService;
+        private readonly IMapper _mapper;
+        private readonly IHubContext<CustomerHub> _customerHubContext;
         public CustomerAppService(
                 ICustomerRepository customerRepository,
                 CustomerManager customerManager,
                 IIdentityUserRepository identityUserRepository,
-                IAccountAppService accountAppService    ,
-                IIdentityUserAppService identityUserService
-
+                IAccountAppService accountAppService,
+                IIdentityUserAppService identityUserService,
+                IMapper mapper,
+                IHubContext<CustomerHub> customerHubContext
             )
         {
             _customerManager = customerManager;
@@ -41,6 +46,8 @@ namespace VCBRDemo.Customers
             _identityUserRepository = identityUserRepository;
             _accountAppService = accountAppService;
             _identityUserService = identityUserService;
+            _mapper = mapper;
+            _customerHubContext = customerHubContext;
         }
 
         [Authorize(VCBRDemoPermissions.Customers.GetInfo)]
@@ -51,7 +58,7 @@ namespace VCBRDemo.Customers
                 Customer customer = await _customerRepository.FindByUserIdAsync(id);
                 if (customer == null)
                     throw new UserFriendlyException("Data not found");
-                return ObjectMapper.Map<Customer, CustomerDTO>(customer);
+                return _mapper.Map<Customer, CustomerDTO>(customer);
             }
             catch( Exception ex )
             {
@@ -64,7 +71,7 @@ namespace VCBRDemo.Customers
         {
             Customer customer = await _customerRepository.FindByIdentityNumberAsync(identityNumber);
 
-            return ObjectMapper.Map<Customer, CustomerDTO>(customer);
+            return _mapper.Map<Customer, CustomerDTO>(customer);
         }
 
 
@@ -91,7 +98,8 @@ namespace VCBRDemo.Customers
                     ? await _customerRepository.CountAsync(c => c.IsActive == true)
                     : await _customerRepository.CountAsync(customer => customer.IdentityNumber.Contains(input.Filter) || customer.Email.Contains(input.Filter)); 
                 
-                List<CustomerDTO> result = ObjectMapper.Map<List<Customer>, List<CustomerDTO>>(customers);
+                List<CustomerDTO> result = _mapper.Map<List<Customer>, List<CustomerDTO>>(customers);
+                // Notify SignalR clients about the new customer
 
                 return new PagedResultDto<CustomerDTO>(
                         totalCount,
@@ -125,7 +133,7 @@ namespace VCBRDemo.Customers
                     ? await _customerRepository.CountAsync(c => c.IsActive == true)
                     : await _customerRepository.CountAsync(customer => customer.IdentityNumber.Contains(input.Filter) || customer.Email.Contains(input.Filter));
 
-                List<CustomerDTO> result = ObjectMapper.Map<List<Customer>, List<CustomerDTO>>(customers);
+                List<CustomerDTO> result = _mapper.Map<List<Customer>, List<CustomerDTO>>(customers);
 
                 return new PagedResultDto<CustomerDTO>(
                         totalCount,
@@ -176,7 +184,7 @@ namespace VCBRDemo.Customers
 
                 await _customerRepository.InsertAsync(customer);
 
-                return ObjectMapper.Map<Customer, CustomerDTO>(customer);
+                return _mapper.Map<Customer, CustomerDTO>(customer);
             }
             catch (Exception ex)
             {
@@ -228,7 +236,7 @@ namespace VCBRDemo.Customers
 
                 await _customerRepository.InsertAsync(customer);
 
-                return ObjectMapper.Map<Customer, CustomerDTO>(customer);
+                return _mapper.Map<Customer, CustomerDTO>(customer);
             }
             catch (Exception ex)
             {
@@ -334,7 +342,7 @@ namespace VCBRDemo.Customers
                 /*Inactive user account*/
                 IdentityUserDto userAcc = await _identityUserService.GetAsync(customer.UserId);
 
-                IdentityUserUpdateDto updateAcc = ObjectMapper.Map<IdentityUserDto, IdentityUserUpdateDto>(userAcc);
+                IdentityUserUpdateDto updateAcc = _mapper.Map<IdentityUserDto, IdentityUserUpdateDto>(userAcc);
 
                 updateAcc.IsActive = false;
 

@@ -25,5 +25,7 @@ public class VCBRDemoApplicationAutoMapperProfile : Profile
         CreateMap<IdentityUserDto, IdentityUserUpdateDto>();
         CreateMap<ImportRequest, ImportRequestDTO>();
         CreateMap<ExportRequest, ExportRequestDTO>();
+        CreateMap<ImportRequest, ImportCRUDDTO>()
+            .ForMember(src => src.RequestStatus, opt => opt.MapFrom(_ => _.RequestStatus.ToString()));
     }
 }

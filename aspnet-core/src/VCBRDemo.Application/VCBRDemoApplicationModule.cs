@@ -11,6 +11,9 @@ using Quartz;
 using Microsoft.Extensions.DependencyInjection;
 using VCBRDemo.Jobs;
 using Volo.Abp.Quartz;
+using Aspose.Cells.Charts;
+using Abp.AspNetCore.SignalR;
+using VCBRDemo.ImportRequests;
 
 namespace VCBRDemo;
 
@@ -31,7 +34,9 @@ namespace VCBRDemo;
         Configure<AbpAutoMapperOptions>(options =>
         {
             options.AddMaps<VCBRDemoApplicationModule>();
+
         });
+
 
         context.Services.AddQuartz(q =>
         {
@@ -49,7 +54,8 @@ namespace VCBRDemo;
             q.AddJobAndTrigger<ExportDataJob>(context.Services.GetConfiguration());
         });
 
-
         context.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+        context.Services.AddSignalR();
     }
 }

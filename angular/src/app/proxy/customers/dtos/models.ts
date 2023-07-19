@@ -29,8 +29,6 @@ export interface CustomerDTO extends EntityDto<string> {
 
 export interface CustomerFilterListDTO extends PagedAndSortedResultRequestDto {
   filter?: string;
-  fromDate?: string;
-  toDate?: string;
 }
 
 export interface CustomerUpdateDTO {

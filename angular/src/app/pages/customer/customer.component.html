@@ -32,6 +32,7 @@
             [(ngModel)]="searchParams.filter"
           />
         </div>
+        <div></div>
         <button id="search" class="btn btn-primary" type="button" style="margin-top: 5%">
           <i class="fa fa-search me-1"></i>
           <span>{{ '::Search' | abpLocalization }}</span>
@@ -196,18 +197,6 @@
         <label for="customer-balance">Balance</label><span style="color: red"> * </span>
         <input type="number" id="customer-balance" class="form-control" formControlName="balance" />
       </div>
-
-      <!-- <div class="mt-2">
-        <label>Birth date</label><span> * </span>
-        <input
-          #datepicker="ngbDatepicker"
-          class="form-control"
-          name="datepicker"
-          formControlName="birthDate"
-          ngbDatepicker
-          (click)="datepicker.toggle()"
-        />
-      </div> -->
     </form>
   </ng-template>
 

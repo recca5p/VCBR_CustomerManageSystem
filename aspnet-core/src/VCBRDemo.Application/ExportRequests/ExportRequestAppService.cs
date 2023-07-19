@@ -1,4 +1,5 @@
-﻿using Aspose.Cells;
+﻿using Abp.Application.Services.Dto;
+using Aspose.Cells;
 using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,6 @@ using Volo.Abp.Uow;
 
 namespace VCBRDemo.ExportRequests
 {
-    [RemoteService(IsEnabled = false)]
     public class ExportRequestAppService : VCBRDemoAppService, IExportRequestAppService
     {
         private readonly IExportRequestRepository _exportRequestRepository;
@@ -26,6 +26,20 @@ namespace VCBRDemo.ExportRequests
             _exportRequestRepository = exportRequestRepository;
         }
 
+        [Authorize(Permissions.VCBRDemoPermissions.Customers.ExportFile)]
+        public async Task<PagedResultDto<ExportRequest>> GetList (PagedAndSortedResultRequestDto model)
+        {
+            List<ExportRequest> res = await  _exportRequestRepository.GetListAsync();
+
+            PagedResultDto<ExportRequest> result = new PagedResultDto<ExportRequest>();
+            int totalCount = res.Count();
+            result.TotalCount = totalCount;
+            result.Items = res.Skip(model.SkipCount).OrderByDescending(_ => _.CreationTime).Take(model.MaxResultCount).ToList();
+
+            return result;
+        }
+
+        [RemoteService(IsEnabled = false)]
         [Authorize(Permissions.VCBRDemoPermissions.Customers.ExportFile)]
         public async Task<ExportRequestReturnDTO> CreateExportRequestAsync(ExportRequestCreateDTO request)
         {

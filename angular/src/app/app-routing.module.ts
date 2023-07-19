@@ -34,6 +34,14 @@ const routes: Routes = [
     loadChildren: () =>
       import('./pages/customer-info/customer-info.module').then(m => m.CustomerInfoModule),
   },
+  {
+    path: 'imports',
+    loadChildren: () => import('./pages/import/import.module').then(m => m.ImportModule),
+  },
+  {
+    path: 'exports',
+    loadChildren: () => import('./pages/export/export.module').then(m => m.ExportModule),
+  },
 ];
 
 @NgModule({
