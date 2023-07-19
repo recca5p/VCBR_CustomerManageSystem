@@ -1,12 +1,17 @@
-﻿using System;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using VCBRDemo.Customers;
 using VCBRDemo.Customers.DTOs;
 using VCBRDemo.Customers.Interfaces;
+using VCBRDemo.Permissions;
 using Volo.Abp;
 using Volo.Abp.Account;
 using Volo.Abp.Application.Dtos;
@@ -21,28 +26,39 @@ namespace VCBRDemo.Customers
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly CustomerManager _customerManager;
+        private readonly IIdentityUserRepository _identityUserRepository;
+        private readonly IAccountAppService _accountAppService;
         private readonly IIdentityUserAppService _identityUserService;
-
+        private readonly IMapper _mapper;
+        private readonly IHubContext<CustomerHub> _customerHubContext;
         public CustomerAppService(
                 ICustomerRepository customerRepository,
                 CustomerManager customerManager,
+                IIdentityUserRepository identityUserRepository,
+                IAccountAppService accountAppService,
                 IIdentityUserAppService identityUserService,
-                IAccountAppService accountAppService
+                IMapper mapper,
+                IHubContext<CustomerHub> customerHubContext
             )
         {
             _customerManager = customerManager;
             _customerRepository = customerRepository;
+            _identityUserRepository = identityUserRepository;
+            _accountAppService = accountAppService;
             _identityUserService = identityUserService;
+            _mapper = mapper;
+            _customerHubContext = customerHubContext;
         }
 
+        [Authorize(VCBRDemoPermissions.Customers.GetInfo)]
         public async Task<CustomerDTO> GetAsync(Guid id)
         {
             try
             {
-                Customer customer = await _customerRepository.GetAsync(id);
+                Customer customer = await _customerRepository.FindByUserIdAsync(id);
                 if (customer == null)
                     throw new UserFriendlyException("Data not found");
-                return ObjectMapper.Map<Customer, CustomerDTO>(customer);
+                return _mapper.Map<Customer, CustomerDTO>(customer);
             }
             catch( Exception ex )
             {
@@ -50,6 +66,16 @@ namespace VCBRDemo.Customers
             }
         }
 
+        [RemoteService(IsEnabled = false)]
+        public async Task<CustomerDTO> FindByIdentityNumberAsync(string identityNumber)
+        {
+            Customer customer = await _customerRepository.FindByIdentityNumberAsync(identityNumber);
+
+            return _mapper.Map<Customer, CustomerDTO>(customer);
+        }
+
+
+        [Authorize(VCBRDemoPermissions.Customers.GetList)]
         public async Task<PagedResultDto<CustomerDTO>> GetListAsync(CustomerFilterListDTO input)
         {
             try
@@ -69,12 +95,49 @@ namespace VCBRDemo.Customers
                     throw new UserFriendlyException("Data not found");
 
                 int totalCount = input.Filter == null
-                    ? await _customerRepository.CountAsync()
-                    : await _customerRepository.CountAsync(customer => customer.FirstName.Contains(input.Filter));
+                    ? await _customerRepository.CountAsync(c => c.IsActive == true)
+                    : await _customerRepository.CountAsync(customer => customer.IdentityNumber.Contains(input.Filter) || customer.Email.Contains(input.Filter)); 
+                
+                List<CustomerDTO> result = _mapper.Map<List<Customer>, List<CustomerDTO>>(customers);
+                // Notify SignalR clients about the new customer
 
                 return new PagedResultDto<CustomerDTO>(
                         totalCount,
-                        ObjectMapper.Map<List<Customer>, List<CustomerDTO>>(customers));
+                        result);
+            }
+            catch (Exception ex)
+            {
+                throw new UserFriendlyException(ex.Message);
+            }
+        }
+        [RemoteService(IsEnabled = false)]
+        public async Task<PagedResultDto<CustomerDTO>> GetListForWorkerAsync(CustomerFilterListDTO input)
+        {
+            try
+            {
+                if (input.Sorting.IsNullOrWhiteSpace())
+                {
+                    input.Sorting = nameof(Customer.FirstName);
+                }
+
+                List<Customer> customers = await _customerRepository.GetListAsync(
+                        input.SkipCount,
+                        input.MaxResultCount,
+                        input.Sorting,
+                        input.Filter
+                    );
+                if (customers.IsNullOrEmpty())
+                    throw new UserFriendlyException("Data not found");
+
+                int totalCount = input.Filter == null
+                    ? await _customerRepository.CountAsync(c => c.IsActive == true)
+                    : await _customerRepository.CountAsync(customer => customer.IdentityNumber.Contains(input.Filter) || customer.Email.Contains(input.Filter));
+
+                List<CustomerDTO> result = _mapper.Map<List<Customer>, List<CustomerDTO>>(customers);
+
+                return new PagedResultDto<CustomerDTO>(
+                        totalCount,
+                        result);
             }
             catch (Exception ex)
             {
@@ -82,23 +145,80 @@ namespace VCBRDemo.Customers
             }
         }
 
+        [Authorize(VCBRDemoPermissions.Customers.Create)]
         public async Task<CustomerDTO> CreateAsync(CustomerCreateDTO input)
         {
             try
             {
-                /*Create AbpUser to generate an account for customer*/
-                IdentityUserCreateDto abpUserInfo = new IdentityUserCreateDto
+                /*Register AbpUser to generate an account for customer*/
+                RegisterDto accRes = new RegisterDto
                 {
-                    Email = input.Email,
+                    EmailAddress = input.Email,
                     UserName = input.IdentityNumber,
-                    Name = input.FirstName,
-                    Surname = input.LastName,
-                    PhoneNumber = input.PhoneNumber,
-                    Password = input.Password, 
-                    RoleNames = new string[] {"user"}
+                    Password = input.Password,
+                    AppName = "VCBRDemo"
                 };
-                /*Always craete customer with role is user*/
-                IdentityUserDto account = await _identityUserService.CreateAsync(abpUserInfo);
+
+                IdentityUserDto account = await _accountAppService.RegisterAsync(accRes);
+
+                /*Assign user role*/
+                IdentityUserUpdateRolesDto roles = new IdentityUserUpdateRolesDto
+                {
+                    RoleNames = new string[] { "user" }
+                };
+                /*Always assign "user" role*/
+                
+                /*Create customer info*/
+                Customer customer = await _customerManager.CreateAsync(
+                    input.FirstName,
+                    input.LastName,
+                    (CustomerGenderEnum)input.Gender,
+                    input.Address,
+                    input.Email,
+                    input.IdentityNumber,
+                    input.PhoneNumber,
+                    (double)input.Balance,
+                    account.Id,
+                    true
+                );
+
+                await _customerRepository.InsertAsync(customer);
+
+                return _mapper.Map<Customer, CustomerDTO>(customer);
+            }
+            catch (Exception ex)
+            {
+                if (ex is Volo.Abp.Validation.AbpValidationException)
+                {
+                    var voloEx = new Volo.Abp.Validation.AbpValidationException();
+                    voloEx = (Volo.Abp.Validation.AbpValidationException)ex;
+                    var message = voloEx.ValidationErrors
+                        .Select(err => err.ToString())
+                        .Aggregate(string.Empty, (current, next) => string.Format("{0}\n{1}", current, next));
+                    throw new UserFriendlyException(message);
+
+                }
+                throw new UserFriendlyException(ex.Message);
+            }
+        }
+        [RemoteService(IsEnabled = false)]
+        public async Task<CustomerDTO> CreateUsingByWorkerAsync(CustomerCreateDTO input)
+        {
+            try
+            {
+                /*Register AbpUser to generate an account for customer*/
+                RegisterDto accRes = new RegisterDto
+                {
+                    EmailAddress = input.Email,
+                    UserName = input.IdentityNumber,
+                    Password = input.Password,
+                    AppName = "VCBRDemo"
+                };
+
+                IdentityUserDto account = await _accountAppService.RegisterAsync(accRes);
+
+                /*Assign user role*/
+                //_customerRepository.AddCustomerToUserRole(account.Id);
 
                 /*Create customer info*/
                 Customer customer = await _customerManager.CreateAsync(
@@ -116,7 +236,7 @@ namespace VCBRDemo.Customers
 
                 await _customerRepository.InsertAsync(customer);
 
-                return ObjectMapper.Map<Customer, CustomerDTO>(customer);
+                return _mapper.Map<Customer, CustomerDTO>(customer);
             }
             catch (Exception ex)
             {
@@ -134,6 +254,8 @@ namespace VCBRDemo.Customers
             }
         }
 
+
+        [Authorize(VCBRDemoPermissions.Customers.Edit)]
         public async Task UpdateAsync(string identityNumber, CustomerUpdateDTO input)
         {
             try
@@ -183,13 +305,25 @@ namespace VCBRDemo.Customers
                 }
 
                 await _customerRepository.UpdateAsync(customer);
+                /*Update AbpUser*/
             }
             catch (Exception ex)
             {
+                if (ex is Volo.Abp.Validation.AbpValidationException)
+                {
+                    var voloEx = new Volo.Abp.Validation.AbpValidationException();
+                    voloEx = (Volo.Abp.Validation.AbpValidationException)ex;
+                    var message = voloEx.ValidationErrors
+                        .Select(err => err.ToString())
+                        .Aggregate(string.Empty, (current, next) => string.Format("{0}\n{1}", current, next));
+                    throw new UserFriendlyException(message);
+
+                }
                 throw new UserFriendlyException(ex.Message);
             }
         }
 
+        [Authorize(VCBRDemoPermissions.Customers.Delete)]
         public async Task DeleteCustomerAsync(string identityNumber)
         {
             try
@@ -198,15 +332,50 @@ namespace VCBRDemo.Customers
                 if (customer == null)
                     throw new UserFriendlyException("The identity number is not exist");
 
-                if (customer.IsDeleted == true)
+                if (customer.IsActive == false)
                     throw new UserFriendlyException("The customer is disabled");
 
-                customer.IsDeleted = true;
+                /*Inactive customer*/
+                customer.IsActive = false;
+
                 await _customerRepository.UpdateAsync(customer);
+                /*Inactive user account*/
+                IdentityUserDto userAcc = await _identityUserService.GetAsync(customer.UserId);
+
+                IdentityUserUpdateDto updateAcc = _mapper.Map<IdentityUserDto, IdentityUserUpdateDto>(userAcc);
+
+                updateAcc.IsActive = false;
+
+                await _identityUserService.UpdateAsync(customer.UserId, updateAcc);
             }
             catch (Exception ex)
             {
+                if (ex is Volo.Abp.Validation.AbpValidationException)
+                {
+                    var voloEx = new Volo.Abp.Validation.AbpValidationException();
+                    voloEx = (Volo.Abp.Validation.AbpValidationException)ex;
+                    var message = voloEx.ValidationErrors
+                        .Select(err => err.ToString())
+                        .Aggregate(string.Empty, (current, next) => string.Format("{0}\n{1}", current, next));
+                    throw new UserFriendlyException(message);
+
+                }
                 throw new UserFriendlyException(ex.Message);
+            }
+        }
+        [RemoteService(IsEnabled = false)]
+        public void AddCustomerToUserRole(List<Guid> userIds)
+        {
+            try
+            {
+                foreach (Guid userId in userIds)
+                {
+                    _customerRepository.AddCustomerToUserRole(userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
     }

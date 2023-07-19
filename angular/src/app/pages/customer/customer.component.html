@@ -1,0 +1,213 @@
+<div class="card">
+  <div class="card-header">
+    <div class="row">
+      <div class="col col-md-6">
+        <h5 class="card-title">
+          {{ 'Customer' | abpLocalization }}
+        </h5>
+      </div>
+      <div class="text-end col col-md-6">
+        <div class="pt-2 text-lg-end">
+          <button
+            *abpPermission="'VCBRDemo.Customers.Create'"
+            id="create"
+            class="btn btn-primary"
+            type="button"
+            (click)="createCustomer()"
+          >
+            <i class="fa fa-plus me-1"></i>
+            <span>{{ '::New Customer' | abpLocalization }}</span>
+          </button>
+        </div>
+      </div>
+      <div class="col col-md-3">
+        <div class="form-group">
+          <label for="identity-search" style="font-weight: bold">Search</label>
+          <input
+            type="text"
+            id="identity-search"
+            class="form-control"
+            placeholder="Identity number or email"
+            (keyup.enter)="list.get()"
+            [(ngModel)]="searchParams.filter"
+          />
+        </div>
+        <div></div>
+        <button id="search" class="btn btn-primary" type="button" style="margin-top: 5%">
+          <i class="fa fa-search me-1"></i>
+          <span>{{ '::Search' | abpLocalization }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <ngx-datatable [rows]="customer.items" [count]="customer.totalCount" [list]="list" default>
+      <ngx-datatable-column
+        [name]="'::Actions' | abpLocalization"
+        [maxWidth]="150"
+        [sortable]="false"
+      >
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <div ngbDropdown container="body" class="d-inline-block">
+            <button
+              class="btn btn-primary btn-sm dropdown-toggle"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              ngbDropdownToggle
+            >
+              <i class="fa fa-cog me-1"></i>{{ '::Actions' | abpLocalization }}
+            </button>
+            <div ngbDropdownMenu>
+              <button
+                *abpPermission="'VCBRDemo.Customers.Edit'"
+                ngbDropdownItem
+                (click)="editCustomer(row.userId)"
+              >
+                {{ '::Edit' | abpLocalization }}
+              </button>
+              <button
+                *abpPermission="'VCBRDemo.Customers.Delete'"
+                ngbDropdownItem
+                (click)="delete(row.identityNumber)"
+              >
+                {{ '::Delete' | abpLocalization }}
+              </button>
+            </div>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column
+        [name]="'::Identity Number' | abpLocalization"
+        prop="identityNumber"
+      ></ngx-datatable-column>
+      <ngx-datatable-column
+        [name]="'::First Name' | abpLocalization"
+        prop="firstName"
+      ></ngx-datatable-column>
+      <ngx-datatable-column
+        [name]="'::Last Name' | abpLocalization"
+        prop="lastName"
+      ></ngx-datatable-column>
+      <ngx-datatable-column
+        [name]="'::Gender' | abpLocalization"
+        prop="gender"
+      ></ngx-datatable-column>
+      <ngx-datatable-column
+        [name]="'::Address' | abpLocalization"
+        prop="address"
+        [width]="300"
+      ></ngx-datatable-column>
+      <ngx-datatable-column
+        [name]="'::Email' | abpLocalization"
+        prop="email"
+        [width]="300"
+      ></ngx-datatable-column>
+      <ngx-datatable-column
+        [name]="'::Phone number' | abpLocalization"
+        prop="phoneNumber"
+      ></ngx-datatable-column>
+      <ngx-datatable-column
+        [name]="'::Balance' | abpLocalization"
+        prop="balance"
+      ></ngx-datatable-column>
+      <ngx-datatable-column
+        [name]="'::Created Time' | abpLocalization"
+        prop="createdTime"
+        [width]="200"
+      ></ngx-datatable-column>
+    </ngx-datatable>
+  </div>
+</div>
+
+<abp-modal [(visible)]="isModalOpen">
+  <ng-template #abpHeader>
+    <h3>{{ (selectedCustomer.identityNumber ? '::Edit' : '::New Customer') | abpLocalization }}</h3>
+  </ng-template>
+
+  <ng-template #abpBody>
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-group" *ngIf="!selectedCustomer.identityNumber">
+        <label for="customer-identityNumber">Identity Number</label
+        ><span style="color: red"> * </span>
+        <input
+          type="text"
+          id="customer-identityNumber"
+          class="form-control"
+          formControlName="identityNumber"
+          autofocus
+        />
+      </div>
+
+      <div class="form-group" *ngIf="!selectedCustomer.identityNumber">
+        <label for="customer-password">Password</label>
+        <input
+          type="password"
+          id="customer-password"
+          class="form-control"
+          formControlName="password"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="customer-firstName">First Name</label>
+        <input
+          type="text"
+          id="customer-firstName"
+          class="form-control"
+          formControlName="firstName"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="customer-lastName">Last Name</label>
+        <input type="text" id="customer-lastName" class="form-control" formControlName="lastName" />
+      </div>
+
+      <div class="form-group">
+        <label for="customer-gender">Gender</label
+        ><span style="color: red" *ngIf="!selectedCustomer.identityNumber"> * </span>
+        <select id="customer-gender" class="form-control" formControlName="gender">
+          <option *ngFor="let gender of genderList" [value]="gender.value">
+            {{ gender.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="customer-address">Address</label>
+        <input type="text" id="customer-address" class="form-control" formControlName="address" />
+      </div>
+
+      <div class="form-group" *ngIf="!selectedCustomer.identityNumber">
+        <label for="customer-email">Email</label><span style="color: red"> * </span>
+        <input type="text" id="customer-email" class="form-control" formControlName="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="customer-phoneNumber">Phone Number</label>
+        <input
+          type="text"
+          id="customer-phoneNumber"
+          class="form-control"
+          formControlName="phoneNumber"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="customer-balance">Balance</label><span style="color: red"> * </span>
+        <input type="number" id="customer-balance" class="form-control" formControlName="balance" />
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template #abpFooter>
+    <button type="button" class="btn" abpClose>
+      {{ '::Close' | abpLocalization }}
+    </button>
+
+    <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">
+      <i class="mr-1 fa fa-check"></i>
+      {{ '::Save' | abpLocalization }}
+    </button>
+  </ng-template>
+</abp-modal>

@@ -1,4 +1,4 @@
-    using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -33,6 +33,16 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Hosting.Internal;
 using Volo.Abp.OpenIddict;
+using Autofac.Core;
+using MongoDB.Driver;
+using MongoDB.Driver.Core.Configuration;
+using VCBRDemo.Customers;
+using VCBRDemo.Files.Interfaces;
+using VCBRDemo.ImportRequests.Interfaces;
+using VCBRDemo.ImportRequests;
+using VCBRDemo.ExportRequests.Interfaces;
+using VCBRDemo.ExportRequests;
+using Aspose.Cells.Charts;
 
 namespace VCBRDemo;
 
@@ -60,6 +70,8 @@ public class VCBRDemoHttpApiHostModule : AbpModule
                 options.UseAspNetCore();
             });
         });
+
+
 
         var hostingEnvironment = context.Services.GetHostingEnvironment();
 
@@ -92,6 +104,19 @@ public class VCBRDemoHttpApiHostModule : AbpModule
         ConfigureVirtualFileSystem(context);
         ConfigureCors(context, configuration);
         ConfigureSwaggerServices(context, configuration);
+        ConfigureCookiePolicy(context);
+        ConfigureAddScopedService(context);
+    }
+    public void ConfigureAddScopedService(ServiceConfigurationContext context)
+    {
+        context.Services.AddScoped<IFileAppService, FileAppService>();
+        context.Services.AddScoped<IImportRequestAppService, ImportRequestAppService>();
+        context.Services.AddScoped<IExportRequestAppService, ExportRequestAppService>();
+        context.Services.AddControllers().AddNewtonsoftJson();
+    }
+
+    private void ConfigureCookiePolicy(ServiceConfigurationContext context)
+    {
         context.Services.AddSameSiteCookiePolicy(); // cookie policy to deal with temporary browser incompatibilities
     }
 
@@ -271,7 +296,6 @@ public class VCBRDemoHttpApiHostModule : AbpModule
             app.UseErrorPage();
         }
         app.UseCookiePolicy();
-
         app.UseCorrelationId();
         app.UseStaticFiles();
         app.UseRouting();
@@ -299,6 +323,9 @@ public class VCBRDemoHttpApiHostModule : AbpModule
 
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
-        app.UseConfiguredEndpoints();
+        app.UseConfiguredEndpoints(endpoints =>
+        {
+            endpoints.MapHub<ImportRequestHub>("/signalr-hub");
+        });
     }
 }

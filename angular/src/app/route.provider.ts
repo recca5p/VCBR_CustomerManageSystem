@@ -15,6 +15,38 @@ function configureRoutes(routesService: RoutesService) {
         order: 1,
         layout: eLayoutType.application,
       },
+      {
+        path: '/customers',
+        name: 'Customer Management',
+        iconClass: 'fas fa-user',
+        order: 2,
+        layout: eLayoutType.application,
+        requiredPolicy: 'VCBRDemo.Customers.GetList',
+      },
+      {
+        path: '/customer-info',
+        name: 'Info',
+        iconClass: 'fas fa-info',
+        order: 3,
+        layout: eLayoutType.application,
+        requiredPolicy: 'VCBRDemo.Customers.DetailInfo',
+      },
+      {
+        path: '/imports',
+        name: 'Import',
+        iconClass: 'fas fa-upload',
+        order: 4,
+        layout: eLayoutType.application,
+        requiredPolicy: 'VCBRDemo.Customers.ImportFile',
+      },
+      {
+        path: '/exports',
+        name: 'Export',
+        iconClass: 'fas fa-download',
+        order: 5,
+        layout: eLayoutType.application,
+        requiredPolicy: 'VCBRDemo.Customers.ExportFile',
+      },
     ]);
   };
 }

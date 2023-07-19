@@ -1,3 +1,4 @@
+import { NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { AccountConfigModule } from '@abp/ng.account/config';
 import { CoreModule } from '@abp/ng.core';
 import { registerLocale } from '@abp/ng.core/locale';
@@ -11,11 +12,11 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { environment } from '../environments/environment';
-import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { APP_ROUTE_PROVIDER } from './route.provider';
 import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
+import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   imports: [

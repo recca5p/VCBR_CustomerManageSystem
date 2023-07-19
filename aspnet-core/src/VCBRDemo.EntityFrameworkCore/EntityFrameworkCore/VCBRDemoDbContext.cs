@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VCBRDemo.Customers;
+using VCBRDemo.ExportRequests;
+using VCBRDemo.Files;
+using VCBRDemo.ImportRequests;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -28,6 +31,8 @@ public class VCBRDemoDbContext :
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     #region Entities from the modules
     public DbSet<Customer> Customers { get; set; }
+    public DbSet<ImportRequest > ImportRequests { get; set; }
+    public DbSet<ExportRequest> ExportRequests { get; set; }
     /* Notice: We only implemented IIdentityDbContext and ITenantManagementDbContext
      * and replaced them for this DbContext. This allows you to perform JOIN
      * queries for the entities of these modules over the repositories easily. You
@@ -88,6 +93,20 @@ public class VCBRDemoDbContext :
             .HasMaxLength(CustomerConsts.MaxLength);
 
             b.HasIndex(b => b.IdentityNumber);
+        });
+
+        builder.Entity<ImportRequest>(b =>
+        {
+            b.ToTable(nameof(ImportRequest));
+
+            b.ConfigureByConvention(); //auto configure for the base class props
+        });
+
+        builder.Entity<ExportRequest>(e =>
+        {
+            e.ToTable(nameof(ExportRequest));
+
+            e.ConfigureByConvention(); //auto configure for the base class props
         });
     }
 }

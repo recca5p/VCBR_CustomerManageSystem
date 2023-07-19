@@ -5,7 +5,7 @@ const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    loadChildren: () => import('./home/home.module').then(m => m.HomeModule),
+    loadChildren: () => import('./pages/home/home.module').then(m => m.HomeModule),
   },
   {
     path: 'account',
@@ -25,10 +25,27 @@ const routes: Routes = [
     loadChildren: () =>
       import('@abp/ng.setting-management').then(m => m.SettingManagementModule.forLazy()),
   },
+  {
+    path: 'customers',
+    loadChildren: () => import('./pages/customer/customer.module').then(m => m.CustomerModule),
+  },
+  {
+    path: 'customer-info',
+    loadChildren: () =>
+      import('./pages/customer-info/customer-info.module').then(m => m.CustomerInfoModule),
+  },
+  {
+    path: 'imports',
+    loadChildren: () => import('./pages/import/import.module').then(m => m.ImportModule),
+  },
+  {
+    path: 'exports',
+    loadChildren: () => import('./pages/export/export.module').then(m => m.ExportModule),
+  },
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, {})],
+  imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}
