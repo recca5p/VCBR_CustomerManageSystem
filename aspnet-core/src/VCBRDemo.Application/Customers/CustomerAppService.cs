@@ -184,7 +184,9 @@ namespace VCBRDemo.Customers
 
                 await _customerRepository.InsertAsync(customer);
 
-                return _mapper.Map<Customer, CustomerDTO>(customer);
+                CustomerDTO result = _mapper.Map<Customer, CustomerDTO>(customer);
+                await _customerHubContext.Clients.All.SendAsync("added", result);
+                return result;
             }
             catch (Exception ex)
             {
@@ -236,7 +238,9 @@ namespace VCBRDemo.Customers
 
                 await _customerRepository.InsertAsync(customer);
 
-                return _mapper.Map<Customer, CustomerDTO>(customer);
+                CustomerDTO result = _mapper.Map<Customer, CustomerDTO>(customer);
+                await _customerHubContext.Clients.All.SendAsync("added", result);
+                return result;
             }
             catch (Exception ex)
             {
@@ -305,6 +309,9 @@ namespace VCBRDemo.Customers
                 }
 
                 await _customerRepository.UpdateAsync(customer);
+                CustomerDTO result = ObjectMapper.Map<Customer,CustomerDTO>(customer);
+                await _customerHubContext.Clients.All.SendAsync("update", result);
+
                 /*Update AbpUser*/
             }
             catch (Exception ex)
@@ -347,6 +354,8 @@ namespace VCBRDemo.Customers
                 updateAcc.IsActive = false;
 
                 await _identityUserService.UpdateAsync(customer.UserId, updateAcc);
+                await _customerHubContext.Clients.All.SendAsync("delete", customer.UserId);
+
             }
             catch (Exception ex)
             {

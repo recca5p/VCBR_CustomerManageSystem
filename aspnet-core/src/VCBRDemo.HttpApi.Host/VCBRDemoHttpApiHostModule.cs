@@ -325,7 +325,9 @@ public class VCBRDemoHttpApiHostModule : AbpModule
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints(endpoints =>
         {
-            endpoints.MapHub<ImportRequestHub>("/signalr-hub");
+            endpoints.MapHub<ImportRequestHub>("/signalr-hub/import");
+            endpoints.MapHub<CustomerHub>("/signalr-hub/customer");
+            endpoints.MapHub<ExportRequestHub>("/signalr-hub/export");
         });
     }
 }
