@@ -10,9 +10,15 @@ namespace VCBRDemo.ImportRequests
 {
     public class ImportRequestHub : Hub
     {
-        public async Task SendCustomerAdded(ImportCRUDDTO response)
+        public async Task SendCustomerAdded(string input)
         {
-            await Clients.All.SendAsync("New import status", response);
+            try
+            {
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

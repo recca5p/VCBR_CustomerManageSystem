@@ -9,7 +9,7 @@ namespace VCBRDemo.ExportRequests.DTOs
     {
         public string? Filter { get; set; }
         public string? FileId { get; set; }
-        public ExportRequestStatusEnum RequestStatus { get; set; }
+        public string RequestStatus { get; set; }
         public string? Result { get; set; }
     }
 }

@@ -30,6 +30,12 @@
       [list]="list"
       default
     >
+      <ngx-datatable-column
+        [width]="300"
+        [name]="'::Status' | abpLocalization"
+        prop="requestStatus"
+      >
+      </ngx-datatable-column>
       <ngx-datatable-column [width]="300" [name]="'::Note' | abpLocalization" prop="result">
       </ngx-datatable-column>
       <ngx-datatable-column [name]="'::Created At' | abpLocalization" prop="creationTime">

@@ -31,11 +31,12 @@
     "@angular/platform-browser": "~16.0.0",
     "@angular/platform-browser-dynamic": "~16.0.0",
     "@angular/router": "~16.0.0",
+    "@microsoft/signalr": "^7.0.9",
     "bootstrap-daterangepicker": "^3.1.0",
     "bootstrap-icons": "~1.8.3",
     "file-saver": "^2.0.5",
     "ng-zorro-antd": "^16.1.0",
-    "rxjs": "7.8.1",
+    "rxjs": "^7.8.1",
     "tslib": "^2.1.0",
     "zone.js": "~0.13.0"
   },

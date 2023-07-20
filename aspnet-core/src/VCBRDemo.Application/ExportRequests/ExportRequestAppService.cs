@@ -1,6 +1,8 @@
 ﻿using Abp.Application.Services.Dto;
 using Aspose.Cells;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,20 +23,25 @@ namespace VCBRDemo.ExportRequests
     public class ExportRequestAppService : VCBRDemoAppService, IExportRequestAppService
     {
         private readonly IExportRequestRepository _exportRequestRepository;
-        public ExportRequestAppService(IExportRequestRepository exportRequestRepository) 
+        private readonly IHubContext<ExportRequestHub> _hubContext;
+        public ExportRequestAppService(IExportRequestRepository exportRequestRepository, IHubContext<ExportRequestHub> hubContext) 
         {
             _exportRequestRepository = exportRequestRepository;
+            _hubContext = hubContext;
         }
 
         [Authorize(Permissions.VCBRDemoPermissions.Customers.ExportFile)]
-        public async Task<PagedResultDto<ExportRequest>> GetList (PagedAndSortedResultRequestDto model)
+        public async Task<PagedResultDto<ExportRequestCrudDTO>> GetList (PagedAndSortedResultRequestDto model)
         {
-            List<ExportRequest> res = await  _exportRequestRepository.GetListAsync();
+            List<ExportRequest> list = await  _exportRequestRepository.GetListAsync();
 
-            PagedResultDto<ExportRequest> result = new PagedResultDto<ExportRequest>();
+            List<ExportRequestCrudDTO> res = ObjectMapper.Map<List<ExportRequest>, List<ExportRequestCrudDTO>>(list);
+
+            PagedResultDto<ExportRequestCrudDTO> result = new PagedResultDto<ExportRequestCrudDTO>();
             int totalCount = res.Count();
             result.TotalCount = totalCount;
             result.Items = res.Skip(model.SkipCount).OrderByDescending(_ => _.CreationTime).Take(model.MaxResultCount).ToList();
+            
 
             return result;
         }
@@ -53,6 +60,9 @@ namespace VCBRDemo.ExportRequests
                     Result = null
                 };
                 ExportRequest result = await _exportRequestRepository.InsertAsync(paramObj);
+                ExportRequestCrudDTO returnDTO = new ExportRequestCrudDTO();
+                returnDTO = ObjectMapper.Map<ExportRequest, ExportRequestCrudDTO>(result);
+                await _hubContext.Clients.All.SendAsync("added", returnDTO);
 
                 return new ExportRequestReturnDTO
                 {
@@ -92,6 +102,10 @@ namespace VCBRDemo.ExportRequests
             }
 
             await _exportRequestRepository.UpdateAsync(exportRequest);
+            ExportRequest exportRequest2 = await _exportRequestRepository.GetAsync(importRequestId);
+            ExportRequestCrudDTO result2 = ObjectMapper.Map<ExportRequest, ExportRequestCrudDTO>(exportRequest2);
+
+            await _hubContext.Clients.All.SendAsync("update", result2);
 
             return new ExportRequestReturnDTO
             {

@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ListService, PagedResultDto } from '@abp/ng.core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
@@ -6,7 +7,8 @@ import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { CustomerDTO, CustomerFilterListDTO } from '@proxy/customers/dtos';
 import { CustomerService } from '@proxy/customers';
 import { ConfigStateService } from '@abp/ng.core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
+import { webSocket } from 'rxjs/webSocket';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-author',
@@ -36,7 +38,8 @@ export class CustomerComponent implements OnInit {
     private customerService: CustomerService,
     private fb: FormBuilder,
     private confirmation: ConfirmationService,
-    private configState: ConfigStateService
+    private configState: ConfigStateService,
+    private changeDetectorRef: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -44,9 +47,68 @@ export class CustomerComponent implements OnInit {
       this.customerService.getList({ ...query, ...this.searchParams });
     this.list.hookToQuery(customerStreamCreator).subscribe(response => {
       this.customer = response;
-      console.log(this.customer);
+    });
+
+    let token: string = `${localStorage.getItem('access_token')}`;
+    this.hubConnection = new HubConnectionBuilder()
+      .withUrl(`${environment.apis.default.url}/signalr-hub/customer`, {
+        accessTokenFactory: () => token,
+        // Add any other headers you want to send with the connection
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }) // Replace with the correct URL
+      .build();
+
+    // Start the SignalR connection
+    this.hubConnection
+      .start()
+      .then(() => {
+        console.log('SignalR hub connection started successfully.');
+      })
+      .catch(error => {
+        console.error('Error starting SignalR hub connection:', error);
+      });
+
+    // Subscribe to the received messages
+    this.hubConnection.on('added', (message: any) => {
+      this.customer.items.unshift(message);
+      this.customer.totalCount++;
+      this.changeDetectorRef.detectChanges();
+      this.changeDetectorRef.markForCheck(); // Add this line for OnPush strategy
+    });
+
+    // Subscribe to the received messages
+    this.hubConnection.on('delete', (message: any) => {
+      // Filter out the item with the matching UserId
+      this.customer.items = this.customer.items.filter(item => item.userId != message);
+
+      // Decrement the totalCount since an item is deleted
+      this.customer.totalCount--;
+      this.changeDetectorRef.detectChanges();
+      this.changeDetectorRef.markForCheck(); // Add this line for OnPush strategy
+    });
+
+    this.hubConnection.on('update', (message: any) => {
+      // Assuming 'message' contains the updated object with the same UserId
+      const updatedItem = message;
+      // Find the index of the item with the matching UserId in the items array
+      const indexToUpdate = this.customer.items.findIndex(
+        item => item.userId === updatedItem.userId
+      );
+
+      // If the item exists in the array, update it with the updated object
+      if (indexToUpdate !== -1) {
+        this.customer.items[indexToUpdate] = updatedItem;
+      }
+      // Decrement the totalCount since an item is deleted
+      this.changeDetectorRef.detectChanges();
+      this.changeDetectorRef.markForCheck(); // Add this line for OnPush strategy
     });
   }
+  private hubConnection: HubConnection;
+
+  // In your component's initialization or relevant method:
 
   get currentUserId(): string {
     return this.configState.getDeep('currentUser.id');
@@ -129,7 +191,6 @@ export class CustomerComponent implements OnInit {
           this.isModalOpen = false;
           this.form.reset();
           this.list.get();
-          window.location.reload();
         });
     } else {
       this.customerService.create(this.form.value).subscribe(() => {

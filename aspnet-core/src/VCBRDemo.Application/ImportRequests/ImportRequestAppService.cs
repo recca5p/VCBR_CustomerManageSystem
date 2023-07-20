@@ -1,5 +1,6 @@
 ﻿using Aspose.Cells;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -34,6 +35,7 @@ namespace VCBRDemo.ImportRequests
         private readonly ICustomerAppService _customerAppService;
         private readonly IIdentityUserRepository _identityUserRepository;
         private readonly ICustomerRepository _customerRepository;
+        private readonly IHubContext<ImportRequestHub> _hubContext;
 
         public ImportRequestAppService(IRepository<ImportRequest, Guid> repository,
             IImportRequestRepository importRequestRepository,
@@ -41,7 +43,8 @@ namespace VCBRDemo.ImportRequests
             ICustomerAppService customerAppService,
             IIdentityUserAppService identityUserAppService,
             IIdentityUserRepository identityUserRepository,
-            ICustomerRepository customerRepository) : base(repository)
+            ICustomerRepository customerRepository,
+            IHubContext<ImportRequestHub> hubContext) : base(repository)
         {
             _importRequestRepository = importRequestRepository;
             _fileAppService = fileAppService;
@@ -53,6 +56,7 @@ namespace VCBRDemo.ImportRequests
             CreatePolicyName = VCBRDemoPermissions.Customers.ImportCrud;
             UpdatePolicyName = VCBRDemoPermissions.Customers.ImportCrud;
             DeletePolicyName = VCBRDemoPermissions.Customers.ImportCrud;
+            _hubContext = hubContext;
         }
         [RemoteService(IsEnabled = false)]
         public async Task<ImportRequestResponseDTO> ImportCustomersByFileAsync(ImportRequestCreateDTO file)
@@ -76,7 +80,8 @@ namespace VCBRDemo.ImportRequests
                 };
 
                 ImportRequest createRes = await _importRequestRepository.InsertAsync(importRequest);
-
+                ImportCRUDDTO signalR = ObjectMapper.Map<ImportRequest, ImportCRUDDTO>(createRes);
+                await _hubContext.Clients.All.SendAsync("added", signalR);
                 byte[] fileBytes;
 
                 using (MemoryStream memoryStream = new MemoryStream())
@@ -136,6 +141,9 @@ namespace VCBRDemo.ImportRequests
             }
 
             await _importRequestRepository.UpdateAsync(importRequest);
+            ImportRequest importRequestAfterUpdate = await _importRequestRepository.GetAsync(importRequestId);
+            ImportCRUDDTO signalR = ObjectMapper.Map<ImportRequest, ImportCRUDDTO>(importRequest);
+            await _hubContext.Clients.All.SendAsync("update", signalR);
 
             return new ImportRequestResponseDTO
             {

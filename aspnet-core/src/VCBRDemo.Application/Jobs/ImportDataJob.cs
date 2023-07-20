@@ -50,7 +50,6 @@ namespace VCBRDemo.Jobs
                 return;
             try
             {
-                await _hubContext.Clients.All.SendAsync("Import status updated", importRequest);
 
                 //update status to begin process
                 ImportRequestResponseDTO beginProcess = await _importRequestAppService.UpdateImportRequestAsync(importRequest.Id, ImportRequestStatusEnum.Executing, null, null);
